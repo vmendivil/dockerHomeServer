@@ -28,8 +28,8 @@ services:
       # Api
       - --api.dashboard=true
       # Entry Points
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
       # Providers
       - --providers.docker=true
 #      - --providers.docker.defaultrule=Host(`{{ index .Labels "com.docker.compose.service" }}.$DOMAINNAME`)
@@ -38,9 +38,13 @@ services:
       - --providers.docker.swarmMode=false
       - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory.
       - --providers.file.watch=true # Only works on top level files in the rules folder
-      # Let's Encrypt
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      # Lets Encrypt Http Challenge
+#      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+#      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      # Lets Encrypt Tls Challenge (might need comment all references to port 80 and entrypoint.web)
+      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      # Lets Encrypt General Config
+      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # Only for testing
       - --certificatesresolvers.letsencrypt.acme.email=$MAINEMAIL
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # File must have chmod 600
     volumes:
