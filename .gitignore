@@ -1,0 +1,3 @@
+traefik.log
+letsencrypt/acme.json
+.env

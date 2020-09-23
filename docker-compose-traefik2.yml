@@ -1,0 +1,66 @@
+version: "3.8"
+
+networks:
+  traefik2_proxy:
+    external:
+      name: traefik2_proxy
+
+services:
+  traefik2:
+    image: traefik:chevrotin # chevrotin tag refers to v2.2.x
+    container_name: traefik2
+    restart: always
+    networks:
+      - traefik2_proxy
+    ports:
+      - 80:80
+      - 443:443
+    command:
+      # General
+      - --global.checkNewVersion=true
+      - --global.sendAnonymousUsage=false
+      # Log
+      - --log=true
+      - --log.level=DEBUG
+      - --accessLog=true
+      - --accessLog.filePath=/traefik.log
+      - --accessLog.bufferingSize=100 # Configuring a buffer of 100 lines
+      # Api
+      - --api.dashboard=true
+      # Entry Points
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # Providers
+      - --providers.docker=true
+#      - --providers.docker.defaultrule=Host(`{{ index .Labels "com.docker.compose.service" }}.$DOMAINNAME`)
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=traefik2_proxy
+      - --providers.docker.swarmMode=false
+      - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory.
+      - --providers.file.watch=true # Only works on top level files in the rules folder
+      # Let's Encrypt
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=$MAINEMAIL
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # File must have chmod 600
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "$SERVER_DIR/traefik2/rules:/rules"
+      - "$SERVER_DIR/traefik2/letsencrypt:/letsencrypt"
+      - "$SERVER_DIR/traefik2/traefik.log:/traefik.log"
+    labels:
+      - "traefik.enable=true"
+      # Dashboard
+      - "traefik.http.routers.traefik.rule=(Host(`<DOMAIN>`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`)))"
+#      - "traefik.http.routers.traefik.rule=Host(`traefik.$DOMAINNAME`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      # Domains
+#      - "traefik.http.routers.traefik.tls.domains[0].main=$DOMAINNAME"
+#      - "traefik.http.routers.traefik.tls.domains[0].sans=*.$DOMAINNAME"
+      # Http to Https Redirect
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
