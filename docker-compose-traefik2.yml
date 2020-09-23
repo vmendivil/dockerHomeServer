@@ -6,6 +6,8 @@ networks:
       name: traefik2_proxy
 
 services:
+
+  # Traefik v2
   traefik2:
     image: traefik:chevrotin # chevrotin tag refers to v2.2.x
     container_name: traefik2
@@ -32,7 +34,6 @@ services:
       - --entrypoints.websecure.address=:443
       # Providers
       - --providers.docker=true
-#      - --providers.docker.defaultrule=Host(`{{ index .Labels "com.docker.compose.service" }}.$DOMAINNAME`)
       - --providers.docker.exposedbydefault=false
       - --providers.docker.network=traefik2_proxy
       - --providers.docker.swarmMode=false
@@ -44,27 +45,70 @@ services:
       # Lets Encrypt Tls Challenge (might need comment all references to port 80 and entrypoint.web)
       - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
       # Lets Encrypt General Config
-      #- "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # Only for testing
-      - --certificatesresolvers.letsencrypt.acme.email=$MAINEMAIL
+#      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory # Only for testing
+      - --certificatesresolvers.letsencrypt.acme.email=$MY_EMAIL
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # File must have chmod 600
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "$SERVER_DIR/traefik2/rules:/rules"
-      - "$SERVER_DIR/traefik2/letsencrypt:/letsencrypt"
-      - "$SERVER_DIR/traefik2/traefik.log:/traefik.log"
+      - "$DOCKERDIR/traefik2/rules:/rules"
+      - "$DOCKERDIR/traefik2/letsencrypt:/letsencrypt"
+      - "$DOCKERDIR/traefik2/traefik.log:/traefik.log"
     labels:
       - "traefik.enable=true"
-      # Dashboard
-      - "traefik.http.routers.traefik.rule=(Host(`<DOMAIN>`) && (PathPrefix(`/api`) || PathPrefix(`/dashboard`)))"
-#      - "traefik.http.routers.traefik.rule=Host(`traefik.$DOMAINNAME`)"
-      - "traefik.http.routers.traefik.service=api@internal"
-      - "traefik.http.routers.traefik.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.traefik.entrypoints=websecure"
+      # Router
+      - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAME`)"
+      - "traefik.http.routers.traefik-rtr.entrypoints=websecure"
+#      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik-rtr.tls.certresolver=letsencrypt"
+      # Middlewares
+#      - "traefik.http.routers.traefik-rtr.middlewares=chain-oauth@file"
+      # Service
+      - "traefik.http.routers.traefik-rtr.service=api@internal"
       # Domains
-#      - "traefik.http.routers.traefik.tls.domains[0].main=$DOMAINNAME"
-#      - "traefik.http.routers.traefik.tls.domains[0].sans=*.$DOMAINNAME"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=$DOMAINNAME"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.$DOMAINNAME"
+      - "traefik.http.routers.traefik-rtr.tls.domains[1].main=$DOMAINNAME_BLOG"
+      - "traefik.http.routers.traefik-rtr.tls.domains[1].sans=*.$DOMAINNAME_BLOG"
       # Http to Https Redirect
-      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
-      - "traefik.http.routers.http-catchall.entrypoints=web"
-      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https@docker"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.http-catchall-rtr.rule=hostregexp(`{any:.+}`)"
+      - "traefik.http.routers.http-catchall-rtr.entrypoints=web"
+      - "traefik.http.routers.http-catchall-rtr.middlewares=redirect-to-https-mdl@docker"
+      - "traefik.http.middlewares.redirect-to-https-mdl.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.redirect-to-https-mdl.redirectscheme.permanent=true"
+
+  # Google OAuth - Single Sign On using OAuth 2.0 for Traefik 2.2
+  # https://console.developers.google.com/
+  oauth:
+    container_name: oauth
+    # image: thomseddon/traefik-forward-auth:latest
+    image: thomseddon/traefik-forward-auth:2.1-arm # Use this image with Raspberry Pi
+    restart: always
+    networks:
+      - traefik2_proxy
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - CLIENT_ID=$GOOGLE_CLIENT_ID
+      - CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+      - SECRET=$OAUTH_SECRET
+      - COOKIE_DOMAIN=$DOMAINNAME
+      - INSECURE_COOKIE=false
+      - AUTH_HOST=oauth.$DOMAINNAME
+      - URL_PATH=/_oauth # must match url defined in google web application
+      - WHITELIST=$OAUTH_EMAIL_1,$OAUTH_EMAIL_2,$OAUTH_EMAIL_3 # email1,email2,email3 or $EMAIL1,$EMAIL2,$EMAIL3
+      - LOG_LEVEL=info
+      - LOG_FORMAT=text
+      - LIFETIME=$OAUTH_SESSION_LIFETIME
+      - DEFAULT_ACTION=auth
+      - DEFAULT_PROVIDER=google
+    labels:
+      - "traefik.enable=true"
+      ## HTTP Routers
+      - "traefik.http.routers.oauth-rtr.rule=Host(`oauth.$DOMAINNAME`)"
+      - "traefik.http.routers.oauth-rtr.entrypoints=websecure"
+      - "traefik.http.routers.oauth-rtr.tls.certresolver=letsencrypt"
+      ## Middlewares
+      - "traefik.http.routers.oauth-rtr.middlewares=chain-oauth@file"
+      ## HTTP Services
+      - "traefik.http.routers.oauth-rtr.service=oauth-svc"
+      - "traefik.http.services.oauth-svc.loadbalancer.server.port=4181"
