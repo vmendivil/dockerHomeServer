@@ -1,3 +1,5 @@
+.env
 traefik.log
 letsencrypt/acme.json
-.env
+rules/middlewares-chains.toml
+rules/middlewares.toml
