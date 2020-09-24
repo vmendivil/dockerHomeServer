@@ -23,7 +23,7 @@ services:
       - --global.sendAnonymousUsage=false
       # Log
       - --log=true
-      - --log.level=DEBUG
+      - --log.level=INFO # (Default: error) DEBUG, INFO, WARN, ERROR, FATAL, PANIC
       - --accessLog=true
       - --accessLog.filePath=/traefik.log
       - --accessLog.bufferingSize=100 # Configuring a buffer of 100 lines
