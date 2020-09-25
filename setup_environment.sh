@@ -22,22 +22,27 @@ docker network create t2proxy
 if [ ! -e ./traefik2proxy/letsencrypt/acme.json ]; then
     echo "Creating acme.json file"
     cp ./traefik2proxy/letsencrypt/acme.json.example ./traefik2proxy/letsencrypt/acme.json
+fi
+
+# 3.1 Set acme.json permissions
+if [ -e ./traefik2proxy/letsencrypt/acme.json ]; then
     echo "Updating permission for acme.json to 600"
     sudo chmod 600 ./traefik2proxy/letsencrypt/acme.json
 fi
 
-# 4. Check if middlewares exist
+# 4. Check if middlewares-chains exist
 if [ ! -e ./traefik2proxy/rules/middlewares-chains.toml ]; then
     echo "Creating middlewares-chains.toml"
     cp ./traefik2proxy/rules/middlewares-chains.toml.example ./traefik2proxy/rules/middlewares-chains.toml
 fi
 
+# 4.1 Check if middlewares exist
 if [ ! -e ./traefik2proxy/rules/middlewares.toml ]; then
     echo "Creating middlewares.toml"
     cp ./traefik2proxy/rules/middlewares.toml.example ./traefik2proxy/rules/middlewares.toml
 fi
 
-# 5. Check if traefik.log
+# 5. Check if traefik.log exists
 if [ ! -e ./traefik2proxy/traefik.log ]; then
     echo "Creating traefik.log"
     cp ./traefik2proxy/traefik.log.example ./traefik2proxy/traefik.log
