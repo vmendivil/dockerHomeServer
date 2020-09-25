@@ -50,9 +50,9 @@ services:
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # File must have chmod 600
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "$DOCKERDIR/traefik2/traefik2proxy/rules:/rules"
-      - "$DOCKERDIR/traefik2/traefik2proxy/letsencrypt:/letsencrypt"
-      - "$DOCKERDIR/traefik2/traefik2proxy/traefik.log:/traefik.log"
+      - "$PROXYDIR/traefik2proxy/rules:/rules"
+      - "$PROXYDIR/traefik2proxy/letsencrypt:/letsencrypt"
+      - "$PROXYDIR/traefik2proxy/traefik.log:/traefik.log"
     labels:
       - "traefik.enable=true"
       # Router
