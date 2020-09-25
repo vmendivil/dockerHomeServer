@@ -1,19 +1,19 @@
 version: "3.8"
 
 networks:
-  traefik2_proxy:
+  t2proxy:
     external:
-      name: traefik2_proxy
+      name: t2proxy
 
 services:
 
   # Traefik v2
-  traefik2:
+  traefik2proxy:
     image: traefik:chevrotin # chevrotin tag refers to v2.2.x
-    container_name: traefik2
+    container_name: traefik2proxy
     restart: always
     networks:
-      - traefik2_proxy
+      - t2proxy
     ports:
       - 80:80
       - 443:443
@@ -35,7 +35,7 @@ services:
       # Providers
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
-      - --providers.docker.network=traefik2_proxy
+      - --providers.docker.network=t2proxy
       - --providers.docker.swarmMode=false
       - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory.
       - --providers.file.watch=true # Only works on top level files in the rules folder
@@ -84,7 +84,7 @@ services:
     image: thomseddon/traefik-forward-auth:2.1-arm # Use this image with Raspberry Pi
     restart: always
     networks:
-      - traefik2_proxy
+      - t2proxy
     security_opt:
       - no-new-privileges:true
     environment:

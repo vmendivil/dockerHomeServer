@@ -1,5 +1,5 @@
 .env
 traefik.log
-letsencrypt/acme.json
-rules/middlewares-chains.toml
-rules/middlewares.toml
+traefik2proxy/letsencrypt/acme.json
+traefik2proxy/rules/middlewares-chains.toml
+traefik2proxy/rules/middlewares.toml
