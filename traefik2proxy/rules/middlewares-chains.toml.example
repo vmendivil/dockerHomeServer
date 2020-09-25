@@ -4,18 +4,18 @@
 
   [http.middlewares.chain-no-auth]
     [http.middlewares.chain-no-auth.chain]
-      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "retry-request", "compress-response" ]
+      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "middlewares-retry-request", "middlewares-compress-response" ]
 
-  [http.middlewares.chain-basic-auth]
-    [http.middlewares.chain-basic-auth.chain]
-      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "middlewares-basic-auth", "retry-request", "compress-response" ]
+#  [http.middlewares.chain-basic-auth]
+#    [http.middlewares.chain-basic-auth.chain]
+#      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "middlewares-basic-auth", "middlewares-retry-request", "middlewares-compress-response" ]
 
   [http.middlewares.chain-oauth]
     [http.middlewares.chain-oauth.chain]
-      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "middlewares-oauth", "retry-request", "compress-response" ]
+      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "middlewares-oauth", "middlewares-compress-response" ]
 
   # Zoneminder
 
   [http.middlewares.chain-zoneminder]
     [http.middlewares.chain-zoneminder.chain]
-      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "strip-zm", "add-zm", "retry-request", "compress-response" ]
+      middlewares = [ "middlewares-rate-limit", "middlewares-secure-headers", "middlewares-strip-zm", "middlewares-add-zm", "middlewares-retry-request", "middlewares-compress-response" ]

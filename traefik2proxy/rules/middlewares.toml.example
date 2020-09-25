@@ -2,10 +2,10 @@
 
   # Authentication
 
-  [http.middlewares.middlewares-basic-auth]
-    [http.middlewares.middlewares-basic-auth.basicAuth]
-      realm = "Traefik2 Basic Auth"
-      usersFile = "/shared/.htpasswd" # be sure to mount the volume through docker-compose.yml
+#  [http.middlewares.middlewares-basic-auth]
+#    [http.middlewares.middlewares-basic-auth.basicAuth]
+#      realm = "Traefik2 Basic Auth"
+#      usersFile = "/shared/.htpasswd" # be sure to mount the volume through docker-compose.yml
 
   [http.middlewares.middlewares-oauth]
     [http.middlewares.middlewares-oauth.forwardAuth]
@@ -20,11 +20,11 @@
       average = 100
       burst = 50
 
-  [http.middlewares.retry-request.retry]
+  [http.middlewares.middlewares-retry-request.retry]
      attempts = 4
 
-  [http.middlewares.compress-response]
-    [http.middlewares.compress-response.compress]
+  [http.middlewares.middlewares-compress-response]
+    [http.middlewares.middlewares-compress-response.compress]
 
   # CAUTION: Any headers defined in docker-compose (yml) will OVERWRITE ALL of the headers defined below.
   [http.middlewares.middlewares-secure-headers]
@@ -54,10 +54,10 @@
 
   # Zoneminder
 
-  [http.middlewares.add-zm]
-    [http.middlewares.add-zm.addPrefix]
+  [http.middlewares.middlewares-add-zm]
+    [http.middlewares.middlewares-add-zm.addPrefix]
       prefix = "/zm"
 
-  [http.middlewares.strip-zm]
-    [http.middlewares.strip-zm.stripPrefix]
+  [http.middlewares.middlewares-strip-zm]
+    [http.middlewares.middlewares-strip-zm.stripPrefix]
       prefixes = ["/zm"]
