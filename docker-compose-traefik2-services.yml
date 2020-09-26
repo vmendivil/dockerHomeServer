@@ -7,6 +7,9 @@ networks:
   myvpn:
     external:
       name: myvpn
+  database:
+    external:
+      name: database
 
 services:
 
@@ -195,3 +198,62 @@ services:
       # Service
       - "traefik.http.routers.zoneminder_home-rtr.service=zoneminder_home-svc"
       - "traefik.http.services.zoneminder_home-svc.loadbalancer.server.port=80"
+
+############################# NEXTCLOUD
+
+  # References to "home" means the instance (in case there are more than one)
+  
+  # MariaDB NextCloud
+  nextcloud_home_mariadb:
+    container_name: nextcloud_home_mariadb
+    image: linuxserver/mariadb:latest
+    #command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    networks:
+      - database
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $NEXTCLOUDMARIADB:3306
+    volumes:
+      - $SERVICESDIR/nextcloud_mariadb/home/config:/config
+      - $SERVICESDIR/nextcloud_mariadb/home/mysql:/var/lib/mysql
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - MYSQL_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD_NEXTCLOUD
+      - MYSQL_DATABASE=$MARIADB_DATABASE_NEXTCLOUD
+      - MYSQL_USER=$MARIADB_USER_NEXTCLOUD
+      - MYSQL_PASSWORD=$MARIADB_PASSWORD_NEXTCLOUD
+
+  # NextCloud
+  nextcloud_home:
+    container_name: nextcloud_home
+    image: nextcloud
+    networks:
+      - database
+      - t2proxy
+    restart: always
+    ports:
+      - $NEXTCLOUD:80
+    security_opt:
+      - no-new-privileges:true
+    links:
+      - nextcloud_home_mariadb
+    volumes:
+      - $SERVICESDIR/nextcloud/home:/var/www/html
+      - $NEXTCLOUDSTORAGEDIR/nextcloud_storage/home:/var/www/html/data
+    labels:
+      - "traefik.enable=true"
+      # Router
+      - "traefik.http.routers.nextcloud_home-rtr.rule=Host(`nextcloudhome.$DOMAINNAME`)"
+      - "traefik.http.routers.nextcloud_home-rtr.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud_home-rtr.tls=true"
+      - "traefik.http.routers.nextcloud_home-rtr.tls.certresolver=letsencrypt"
+      # Middleware
+      - "traefik.http.routers.nextcloud_home-rtr.middlewares=chain-no-auth@file"
+      # Service
+      - "traefik.http.routers.nextcloud_home-rtr.service=nextcloud_home-svc"
+      - "traefik.http.services.nextcloud_home-svc.loadbalancer.server.port=80"
