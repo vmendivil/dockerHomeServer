@@ -1,0 +1,197 @@
+version: "3.8"
+
+networks:
+  t2proxy:
+    external:
+      name: t2proxy
+  myvpn:
+    external:
+      name: myvpn
+
+services:
+
+  # Portainer - WebUI for Containers
+  portainer:
+    container_name: portainer
+    image: portainer/portainer:latest
+    restart: always
+    command: --no-analytics # -H unix:///var/run/docker.sock
+    networks:
+      - t2proxy
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "$PORTAINER_PORT:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - $SERVICESDIR/portainer/data:/data 
+    environment:
+      - TZ=$TZ
+    labels:
+      - "traefik.enable=true"
+      # Router
+      - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.$DOMAINNAME`)"
+      - "traefik.http.routers.portainer-rtr.entrypoints=websecure"
+      - "traefik.http.routers.portainer-rtr.tls=true"
+      - "traefik.http.routers.portainer-rtr.tls.certresolver=letsencrypt"
+      # Middleware
+      - "traefik.http.routers.portainer-rtr.middlewares=chain-oauth@file"
+      # Service
+      - "traefik.http.routers.portainer-rtr.service=portainer-svc"
+      - "traefik.http.services.portainer-svc.loadbalancer.server.port=9000"
+
+  # Netdata - System monitoring
+  netdata:
+    container_name: netdata
+    image: netdata/netdata:latest
+    hostname: $HOST_NAME # set to fqdn of host
+    restart: unless-stopped
+    networks:
+      - t2proxy
+    ports:
+      - $NETDATA_PORT:19999
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+      - no-new-privileges:true
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - PGID=$PGID
+    labels:
+      - "traefik.enable=true"
+      # Router
+      - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
+      - "traefik.http.routers.netdata-rtr.entrypoints=websecure"
+      - "traefik.http.routers.netdata-rtr.tls=true"
+      - "traefik.http.routers.netdata-rtr.tls.certresolver=letsencrypt"
+      # Middleware
+      - "traefik.http.routers.netdata-rtr.middlewares=chain-oauth@file"
+      # Service
+      - "traefik.http.routers.netdata-rtr.service=netdata-svc"
+      - "traefik.http.services.netdata-svc.loadbalancer.server.port=19999"
+
+  # Transmission with OpenVpn
+  # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
+  transmission-openvpn:
+    image: haugene/transmission-openvpn:latest-armhf
+    container_name: transmission-openvpn
+    restart: always # If not always, disable WEBPROXY_ENABLED
+    networks:
+      - myvpn
+    ports:
+      - "$TRANSMISSIONOPENVPNGUI:9091" # GUI
+      - "$TRANSMISSIONOPENVPN:8888" # Transmission Port
+    devices:
+      - /dev/net/tun # This creates a tunnel for Transmission
+    volumes:
+      - '$SERVICESDIR/transmissionopenvpn:/config'
+      - '$DOWNLOADS/torrent:/data' # Downloads
+      - '/etc/localtime:/etc/localtime:ro'
+    environment:
+      - CREATE_TUN_DEVICE=true
+      - OPENVPN_PROVIDER=$OPENVPN_PROVIDER
+      # - OPENVPN_CONFIG=CA Toronto # Can be comma separated
+      - OPENVPN_USERNAME=$OPENVPN_USERNAME
+      - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
+      - WEBPROXY_ENABLED=true # Enable other containers to use the vpn
+      - LOCAL_NETWORK=192.168.1.0/24 # Match the local network of the host device
+      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 # Restart if connection fails
+      - PUID=$PUID
+      - PGID=$PGID
+      - TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED=false
+      # Connections
+      - TRANSMISSION_PEER_LIMIT_GLOBAL=1050
+      - TRANSMISSION_MAX_PEERS_GLOBAL=1050
+      - TRANSMISSION_PEER_LIMIT_PER_TORRENT=50
+      - TRANSMISSION_UPLOAD_SLOTS_PER_TORRENT=5
+      - TRANSMISSION_DOWNLOAD_QUEUE_ENABLED=true
+      - TRANSMISSION_DOWNLOAD_QUEUE_SIZE=20
+      - TRANSMISSION_IDLE_SEEDING_LIM=5
+      - TRANSMISSION_IDLE_SEEDING_LIMIT=5
+      - TRANSMISSION_IDLE_SEEDING_LIMIT_ENABLED=true
+      # Files
+      # - TRANSMISSION_PREALLOCATION=1
+      # Speed
+      - TRANSMISSION_RATIO_LIMIT=2
+      - TRANSMISSION_RATIO_LIMIT_ENABLED=true
+      - TRANSMISSION_SPEED_LIMIT_UP=20
+      - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
+    cap_add:
+      - NET_ADMIN
+    logging:
+      driver: json-file
+      options:
+        max-size: 10M
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+
+  # Heimdall - Unified Frontend Dashboard
+  heimdall:
+    container_name: heimdall
+    image: linuxserver/heimdall:latest
+    restart: unless-stopped
+    networks:
+      - t2proxy
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "$HEIMDALL_PORT:80"
+    volumes:
+      - $SERVICESDIR/heimdall:/config
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    labels:
+      - "traefik.enable=true"
+      # Router
+      - "traefik.http.routers.heimdall-rtr.rule=Host(`heimdall.$DOMAINNAME`)"
+      - "traefik.http.routers.heimdall-rtr.entrypoints=websecure"
+      - "traefik.http.routers.heimdall-rtr.tls=true"
+      - "traefik.http.routers.heimdall-rtr.tls.certresolver=letsencrypt"
+      # Middleware
+      - "traefik.http.routers.heimdall-rtr.middlewares=chain-oauth@file"
+      # Service
+      - "traefik.http.routers.heimdall-rtr.service=heimdall-svc"
+      - "traefik.http.services.heimdall-svc.loadbalancer.server.port=80"
+
+  # Zoneminder
+  # References to "home" means the instance (in case there are more than one)
+  zoneminder_home:
+    image: sgarzarella/zoneminder-armhf:latest
+    container_name: zoneminder_home
+    restart: unless-stopped
+    networks:
+      - t2proxy
+    security_opt:
+      - no-new-privileges:true
+    privileged: true
+    ports:
+      - $ZONEMINDER_PORT:80
+      - $ZONEMINDER_WEBSOCKET_PORT:9000
+    environment:
+      TZ: $TZ
+      SHMEM: "50%"
+      SSL_EVENTS: "1"
+      PUID: $PUID
+      PGID: $PGID
+    volumes:
+      - $SERVICESDIR/zoneminder/home:/config
+      - $ZMVIDEODIR/zoneminder_video/home:/var/cache/zoneminder
+    labels:
+      - "traefik.enable=true"
+      # Router
+      - "traefik.http.routers.zoneminder_home-rtr.rule=Host(`zoneminderhome.$DOMAINNAME`)"
+      - "traefik.http.routers.zoneminder_home-rtr.entrypoints=websecure"
+      - "traefik.http.routers.zoneminder_home-rtr.tls=true"
+      - "traefik.http.routers.zoneminder_home-rtr.tls.certresolver=letsencrypt"
+      # Middleware
+      - "traefik.http.routers.zoneminder_home-rtr.middlewares=chain-zoneminder@file"
+      # Service
+      - "traefik.http.routers.zoneminder_home-rtr.service=zoneminder_home-svc"
+      - "traefik.http.services.zoneminder_home-svc.loadbalancer.server.port=80"

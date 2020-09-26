@@ -3,6 +3,10 @@
 #
 # This file should be used to create files based on "*.example" templates for new environments.
 #
+# IMPORTANT: 
+# This file was created on windows, so throw an error when executed from linux,
+#   to fix the issue, run: dos2unix setup_environment.sh
+#
 
 # 1. Check if .env file exists
 if [ -e .env ]; then
@@ -15,8 +19,10 @@ else
     exit 1
 fi
 
-# 2. Create docker network
+# 2. Create docker networks
 docker network create t2proxy
+docker network create myvpn
+docker network create database
 
 # 3. Check if acme.json exists
 if [ ! -e ./traefik2proxy/letsencrypt/acme.json ]; then
@@ -47,5 +53,12 @@ if [ ! -e ./traefik2proxy/traefik.log ]; then
     echo "Creating traefik.log"
     cp ./traefik2proxy/traefik.log.example ./traefik2proxy/traefik.log
 fi
+
+# 6. Check if service-openmediavault exists
+#if [ ! -e ./traefik2proxy/rules/service-openmediavault.toml ]; then
+#    echo "Creating service-openmediavault.toml"
+#    cp ./traefik2proxy/rules/service-openmediavault.toml.example ./traefik2proxy/rules/service-openmediavault.toml
+#    echo "Ensure to properly configure OMV service parameters"
+#fi
 
 exit 0
