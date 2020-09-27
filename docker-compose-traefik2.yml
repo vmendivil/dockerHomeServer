@@ -40,19 +40,25 @@ services:
       - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory.
       - --providers.file.watch=true # Only works on top level files in the rules folder
       # Lets Encrypt HTTP Challenge (might need to enable reference to port 80 and entrypoint.web)
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+#      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+#      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
       # Lets Encrypt TLS Challenge (might need comment all references to port 80 and entrypoint.web)
 #      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      # Lets Encrypt DNS Challenge (add environment variables and tls.domains)
+      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
+      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
       # Lets Encrypt General Config
       - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory # Only for testing
-      - --certificatesresolvers.letsencrypt.acme.email=$MY_EMAIL
+      - --certificatesresolvers.letsencrypt.acme.email=$CLOUDFLARE_EMAIL
       - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # File must have chmod 600
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "$PROXYDIR/traefik2proxy/rules:/rules"
       - "$PROXYDIR/traefik2proxy/letsencrypt:/letsencrypt"
       - "$PROXYDIR/traefik2proxy/traefik.log:/traefik.log"
+    environment:
+      - CF_API_EMAIL=$CLOUDFLARE_EMAIL
+      - CF_API_KEY=$CLOUDFLARE_API_KEY
     labels:
       - "traefik.enable=true"
       # Router
