@@ -39,19 +39,21 @@ services:
       - --providers.docker.swarmMode=false
       - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory.
       - --providers.file.watch=true # Only works on top level files in the rules folder
-      # Lets Encrypt HTTP Challenge (might need to enable reference to port 80 and entrypoint.web)
+      # LetsEncrypt HTTP Challenge (enable access on port 80)
 #      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
 #      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-      # Lets Encrypt TLS Challenge (might need comment all references to port 80 and entrypoint.web)
+#      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.httpchallenge.letsencrypt.json # File must have chmod 600
+      # LetsEncrypt TLS Challenge (might need comment all references to port 80 and entrypoint.web)
 #      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
-      # Lets Encrypt DNS Challenge (add environment variables and tls.domains)
+      # LetsEncrypt DNS Challenge (add environment variables and ensure tls.domain labels are in place)
       - --certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
-      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.delayBeforeCheck=0
+      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.delayBeforeCheck=5 # Seconds
       - --certificatesResolvers.letsencrypt.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
-      # Lets Encrypt General Config
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.dnschallenge.cloudflare.json # File must have chmod 600
+      # LetsEncrypt General Config
 #      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory # Only for testing
       - --certificatesresolvers.letsencrypt.acme.email=$CLOUDFLARE_EMAIL
-      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # File must have chmod 600
+#      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # Ensure no other storage is active on challenges. File must have chmod 600
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "$PROXYDIR/traefik2proxy/rules:/rules"
@@ -65,17 +67,17 @@ services:
       # Router
       - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAME`)"
       - "traefik.http.routers.traefik-rtr.entrypoints=websecure"
-      - "traefik.http.routers.traefik-rtr.tls=true"
+#      - "traefik.http.routers.traefik-rtr.tls=true"
       - "traefik.http.routers.traefik-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.traefik-rtr.middlewares=chain-oauth@file"
       # Service
       - "traefik.http.routers.traefik-rtr.service=api@internal"
       # Domains
-#      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=$DOMAINNAME"
-#      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.$DOMAINNAME"
-#      - "traefik.http.routers.traefik-rtr.tls.domains[1].main=$DOMAINNAME_BLOG"
-#      - "traefik.http.routers.traefik-rtr.tls.domains[1].sans=*.$DOMAINNAME_BLOG"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].main=$DOMAINNAME"
+      - "traefik.http.routers.traefik-rtr.tls.domains[0].sans=*.$DOMAINNAME"
+      - "traefik.http.routers.traefik-rtr.tls.domains[1].main=$DOMAINNAME_BLOG"
+      - "traefik.http.routers.traefik-rtr.tls.domains[1].sans=*.$DOMAINNAME_BLOG"
       # Http to Https Redirect
       - "traefik.http.routers.http-catchall-rtr.rule=hostregexp(`{any:.+}`)"
       - "traefik.http.routers.http-catchall-rtr.entrypoints=web"
@@ -113,7 +115,7 @@ services:
       # Router
       - "traefik.http.routers.oauth-rtr.rule=Host(`oauth.$DOMAINNAME`)"
       - "traefik.http.routers.oauth-rtr.entrypoints=websecure"
-      - "traefik.http.routers.oauth-rtr.tls=true"
+#      - "traefik.http.routers.oauth-rtr.tls=true"
       - "traefik.http.routers.oauth-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.oauth-rtr.middlewares=chain-oauth@file"
@@ -122,6 +124,7 @@ services:
       - "traefik.http.services.oauth-svc.loadbalancer.server.port=4181"
 
   # Cloudflare DDNS - Dynamic DNS Updater
+  # Add one of this containers for each domain controlled by traefik
   cf-ddns:
     container_name: cf-ddns
     image: oznu/cloudflare-ddns:latest
@@ -159,7 +162,7 @@ services:
       # Router
       - "traefik.http.routers.dozzle-rtr.rule=Host(`dozzle.$DOMAINNAME`)"
       - "traefik.http.routers.dozzle-rtr.entrypoints=websecure"
-      - "traefik.http.routers.dozzle-rtr.tls=true"
+#      - "traefik.http.routers.dozzle-rtr.tls=true"
       - "traefik.http.routers.dozzle-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.dozzle-rtr.middlewares=chain-oauth@file"

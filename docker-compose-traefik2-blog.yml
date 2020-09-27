@@ -69,7 +69,7 @@ services:
       # Router
       - "traefik.http.routers.blog_wordpress-rtr.rule=Host(`$DOMAINNAME_BLOG`,`www.$DOMAINNAME_BLOG`)"
       - "traefik.http.routers.blog_wordpress-rtr.entrypoints=websecure"
-      - "traefik.http.routers.blog_wordpress-rtr.tls=true"
+#      - "traefik.http.routers.blog_wordpress-rtr.tls=true"
       - "traefik.http.routers.blog_wordpress-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.blog_wordpress-rtr.middlewares=chain-no-auth@file"

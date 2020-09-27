@@ -35,7 +35,7 @@ services:
       # Router
       - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.$DOMAINNAME`)"
       - "traefik.http.routers.portainer-rtr.entrypoints=websecure"
-      - "traefik.http.routers.portainer-rtr.tls=true"
+#      - "traefik.http.routers.portainer-rtr.tls=true"
       - "traefik.http.routers.portainer-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.portainer-rtr.middlewares=chain-oauth@file"
@@ -69,7 +69,7 @@ services:
       # Router
       - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
       - "traefik.http.routers.netdata-rtr.entrypoints=websecure"
-      - "traefik.http.routers.netdata-rtr.tls=true"
+#      - "traefik.http.routers.netdata-rtr.tls=true"
       - "traefik.http.routers.netdata-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.netdata-rtr.middlewares=chain-oauth@file"
@@ -155,7 +155,7 @@ services:
       # Router
       - "traefik.http.routers.heimdall-rtr.rule=Host(`heimdall.$DOMAINNAME`)"
       - "traefik.http.routers.heimdall-rtr.entrypoints=websecure"
-      - "traefik.http.routers.heimdall-rtr.tls=true"
+#      - "traefik.http.routers.heimdall-rtr.tls=true"
       - "traefik.http.routers.heimdall-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.heimdall-rtr.middlewares=chain-oauth@file"
@@ -191,7 +191,7 @@ services:
       # Router
       - "traefik.http.routers.zoneminder_home-rtr.rule=Host(`zoneminderhome.$DOMAINNAME`)"
       - "traefik.http.routers.zoneminder_home-rtr.entrypoints=websecure"
-      - "traefik.http.routers.zoneminder_home-rtr.tls=true"
+#      - "traefik.http.routers.zoneminder_home-rtr.tls=true"
       - "traefik.http.routers.zoneminder_home-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.zoneminder_home-rtr.middlewares=chain-zoneminder@file"
@@ -250,7 +250,7 @@ services:
       # Router
       - "traefik.http.routers.nextcloud_home-rtr.rule=Host(`nextcloudhome.$DOMAINNAME`)"
       - "traefik.http.routers.nextcloud_home-rtr.entrypoints=websecure"
-      - "traefik.http.routers.nextcloud_home-rtr.tls=true"
+#      - "traefik.http.routers.nextcloud_home-rtr.tls=true"
       - "traefik.http.routers.nextcloud_home-rtr.tls.certresolver=letsencrypt"
       # Middleware
       - "traefik.http.routers.nextcloud_home-rtr.middlewares=chain-no-auth@file"
