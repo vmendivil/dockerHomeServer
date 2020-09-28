@@ -180,9 +180,9 @@ services:
       - NET_RAW
     volumes:
       - /var/log/docker:/var/log/docker
-#      - $DOCKERDIR/hass/home-assistant.log:/var/log/home-assistant.log:ro
-      - $DOCKERDIR/fail2ban:/data
-      - $DOCKERDIR/fail2ban/fail2ban.d:/etc/fail2ban/fail2ban.d
+#      - $SERVICESDIR/hass/home-assistant.log:/var/log/home-assistant.log:ro
+      - $SERVICESDIR/fail2ban:/data
+      - $SERVICESDIR/fail2ban/fail2ban.d:/etc/fail2ban/fail2ban.d
     environment:
       - TZ=$TZ
       - F2B_LOG_LEVEL=INFO
