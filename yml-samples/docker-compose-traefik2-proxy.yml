@@ -144,6 +144,36 @@ services:
       - DELETE_ON_STOP=false
       - DNS_SERVER=1.1.1.1
 
+  # Fail2ban - Network/Logging Security
+    # Other commands: https://www.fail2ban.org/wiki/index.php/Commands
+  # Check status of ssh jail:
+    # sudo fail2ban-client status sshd
+  fail2ban:
+    container_name: fail2ban
+    image: crazymax/fail2ban:latest
+    restart: always
+    network_mode: host
+    security_opt:
+      - no-new-privileges:true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - /var/log/docker:/var/log/docker
+#      - $DOCKERDIR/hass/home-assistant.log:/var/log/home-assistant.log:ro
+      - $DOCKERDIR/fail2ban:/data
+      - $DOCKERDIR/fail2ban/fail2ban.d:/etc/fail2ban/fail2ban.d
+    environment:
+      - TZ=$TZ
+      - F2B_LOG_LEVEL=INFO
+      - F2B_DB_PURGE_AGE=1d # Age at which bans should be purged from the database
+      - F2B_IPTABLES_CHAIN=DOCKER-USER # Specifies the iptables chain to which the Fail2Ban rules should be added
+#      - SSMTP_HOST=smtp.gmail.com
+#      - SSMTP_PORT=465
+#      - SSMTP_USER=$SMTP_EMAIL
+#      - SSMTP_PASSWORD=$SMTP_PASS # Create an "app password" if you use 2FA
+#      - SSMTP_TLS=YES
+
   # Dozzle - Real-time Docker Log Viewer
   dozzle:
     image: amir20/dozzle:latest
