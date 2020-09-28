@@ -9,7 +9,7 @@ services:
 
   # Traefik v2
   traefik2proxy:
-    image: traefik:chevrotin # chevrotin tag refers to v2.2.x
+    image: traefik:picodon # chevrotin tag refers to v2.3.x
     container_name: traefik2proxy
     restart: always
     networks:
@@ -32,6 +32,8 @@ services:
       # Entry Points
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      # Pilot
+      - --pilot.token=$TRAEFIKPILOTKEY
       # Providers
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
