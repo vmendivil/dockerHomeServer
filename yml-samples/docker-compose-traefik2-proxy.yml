@@ -58,12 +58,15 @@ services:
 #      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # Ensure no other storage is active on challenges. File must have chmod 600
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
       - "$PROXYDIR/traefik2proxy/rules:/rules"
       - "$PROXYDIR/traefik2proxy/letsencrypt:/letsencrypt"
       - "$PROXYDIR/traefik2proxy/traefik.log:/traefik.log"
     environment:
       - CF_API_EMAIL=$CLOUDFLARE_EMAIL
       - CF_API_KEY=$CLOUDFLARE_API_KEY
+      - TZ=$TZ
     labels:
       - "traefik.enable=true"
       # Router

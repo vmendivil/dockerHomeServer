@@ -64,12 +64,15 @@ services:
 #      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # Ensure no other storage is active on challenges. File must have chmod 600
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
       - "$PROXYDIR/traefik2proxy/rules:/rules"
       - "$PROXYDIR/traefik2proxy/letsencrypt:/letsencrypt"
       - "$PROXYDIR/traefik2proxy/traefik.log:/traefik.log"
     environment:
       - CF_API_EMAIL=$CLOUDFLARE_EMAIL
       - CF_API_KEY=$CLOUDFLARE_API_KEY
+      - TZ=$TZ
     labels:
       - "traefik.enable=true"
       # Router
@@ -312,7 +315,7 @@ services:
       - 8.8.8.8
       - 8.8.4.4
 
-  # Heimdall - Unified Frontend Dashboard
+  # Heimdall Web - Unified Frontend Dashboard
   heimdall:
     container_name: heimdall
     image: linuxserver/heimdall:latest
@@ -341,6 +344,22 @@ services:
       # Service
       - "traefik.http.routers.heimdall-rtr.service=heimdall-svc"
       - "traefik.http.services.heimdall-svc.loadbalancer.server.port=80"
+
+    # Heimdall Local - Unified Frontend Alternative
+  heimdall_local:
+    container_name: heimdall_local
+    image: linuxserver/heimdall:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "$HEIMDALL_LOCAL_PORT:80"
+    volumes:
+      - $SERVICESDIR/heimdall_local:/config
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
 
   # Zoneminder
   # References to "home" means the instance (in case there are more than one)
