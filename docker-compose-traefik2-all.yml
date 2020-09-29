@@ -511,14 +511,12 @@ services:
       - MYSQL_PASSWORD=$WORDPRESS_BLOG_DB_PASSWORD
 
   # WordPress
-
-  # Create file (volumes) php.conf.uploads.ini and paste below content before container creation:
-  #file_uploads = On
-  #memory_limit = 64M
-  #upload_max_filesize = 64M
-  #post_max_size = 64M
-  #max_execution_time = 600
-
+    # Create file (volumes) php.conf.uploads.ini and paste below content before container creation:
+    #file_uploads = On
+    #memory_limit = 64M
+    #upload_max_filesize = 64M
+    #post_max_size = 64M
+    #max_execution_time = 600
   blog_wordpress:
     container_name: blog_wordpress
     image: wordpress:5.5
@@ -577,15 +575,32 @@ services:
       - MYSQL_USER=$WORDPRESS_DB_USER
       - MYSQL_PASSWORD=$WORDPRESS_DB_PASSWORD
 
+  # PhpMyAdmin
+  myownsite_phpmyadmin:
+    image: ebspace/armhf-phpmyadmin
+    container_name: myownsite_phpmyadmin
+    restart: unless-stopped
+    networks:
+      - database
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $MYOWNSITE_PHPMYADMIN:80
+    links:
+      - myownsite_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
+      PMA_HOST: myownsite_mariadb
+      PMA_PORT: 3306
+#      PMA_ARBITRARY: 1
+    
   # WordPress
-
-  # Create file (volumes) php.conf.uploads.ini and paste below content before container creation:
-  #file_uploads = On
-  #memory_limit = 64M
-  #upload_max_filesize = 64M
-  #post_max_size = 64M
-  #max_execution_time = 600
-
+    # Create file (volumes) php.conf.uploads.ini and paste below content before container creation:
+    #file_uploads = On
+    #memory_limit = 64M
+    #upload_max_filesize = 64M
+    #post_max_size = 64M
+    #max_execution_time = 600
   myownsite_wordpress:
     container_name: myownsite_wordpress
     image: wordpress:5.5
