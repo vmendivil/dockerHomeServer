@@ -257,3 +257,30 @@ services:
       # Service
       - "traefik.http.routers.nextcloud_home-rtr.service=nextcloud_home-svc"
       - "traefik.http.services.nextcloud_home-svc.loadbalancer.server.port=80"
+
+  # Guacamole
+      # Create new user and delete default user
+  guacamole:
+    container_name: guacamole
+    image: oznu/guacamole:armhf
+    restart: always
+    networks:
+      - t2proxy
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $GUACAMOLE_PORT:8080
+    volumes:
+      - '$SERVICESDIR/guacamole:/config'
+    labels:
+      - "traefik.enable=true"
+      # Router
+      - "traefik.http.routers.guacamole-rtr.rule=Host(`guacamole.$DOMAINNAME`)"
+      - "traefik.http.routers.guacamole-rtr.entrypoints=websecure"
+#      - "traefik.http.routers.guacamole-rtr.tls=true"
+      - "traefik.http.routers.guacamole-rtr.tls.certresolver=letsencrypt"
+      # Middleware
+      - "traefik.http.routers.guacamole-rtr.middlewares=chain-oauth@file"
+      # Service
+      - "traefik.http.routers.guacamole-rtr.service=guacamole-svc"
+      - "traefik.http.services.guacamole-svc.loadbalancer.server.port=8080"
