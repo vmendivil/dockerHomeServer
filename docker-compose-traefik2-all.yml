@@ -292,7 +292,7 @@ services:
   # Transmission with OpenVpn
   # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
   transmission-openvpn:
-    image: haugene/transmission-openvpn:latest-armhf
+    image: haugene/transmission-openvpn:2.13-armhf
     container_name: transmission-openvpn
     restart: always # If not always, disable WEBPROXY_ENABLED
     networks:
@@ -313,7 +313,7 @@ services:
       - OPENVPN_USERNAME=$OPENVPN_USERNAME
       - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
       - WEBPROXY_ENABLED=true # Enable other containers to use the vpn
-      - LOCAL_NETWORK=192.168.1.0/16 # Match the local network of the host device
+      - LOCAL_NETWORK=$LOCAL_NETWORK # Match the local network of the host device
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 # Restart if connection fails
       - PUID=$PUID
       - PGID=$PGID
@@ -340,7 +340,7 @@ services:
     logging:
       driver: json-file
       options:
-        max-size: 10M
+        max-size: 10m
     dns:
       - 8.8.8.8
       - 8.8.4.4
