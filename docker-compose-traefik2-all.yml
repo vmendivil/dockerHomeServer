@@ -74,6 +74,9 @@ services:
       - CF_API_KEY=$CLOUDFLARE_API_KEY
       - TZ=$TZ
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAME`)"
@@ -122,6 +125,9 @@ services:
       - DEFAULT_ACTION=auth
       - DEFAULT_PROVIDER=google
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.oauth-rtr.rule=Host(`oauth.$DOMAINNAME`)"
@@ -206,7 +212,7 @@ services:
     ports:
       - "$DOZZLE_PORT:8080"
     environment:
-      DOZZLE_LEVEL: info
+#      DOZZLE_LEVEL: info
       DOZZLE_TAILSIZE: 300
 #      DOZZLE_FILTER: "status=running"
 #      DOZZLE_FILTER: "label=log_me" # limits logs displayed to containers with this label
@@ -243,6 +249,9 @@ services:
     environment:
       - TZ=$TZ
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.$DOMAINNAME`)"
@@ -292,7 +301,7 @@ services:
   # Transmission with OpenVpn
   # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
   transmission-openvpn:
-    image: haugene/transmission-openvpn:2.13-armhf
+    image: haugene/transmission-openvpn:2.13-armhf #latest-armhf
     container_name: transmission-openvpn
     restart: always # If not always, disable WEBPROXY_ENABLED
     networks:
@@ -415,6 +424,9 @@ services:
       - $SERVICESDIR/zoneminder/home:/config
       - $ZMVIDEODIR/zoneminder_video/home:/var/cache/zoneminder
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.zoneminder_home-rtr.rule=Host(`zoneminderhome.$DOMAINNAME`)"
@@ -539,6 +551,9 @@ services:
       WORDPRESS_DB_USER: $WORDPRESS_BLOG_DB_USER
       WORDPRESS_DB_PASSWORD: $WORDPRESS_BLOG_DB_PASSWORD
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.blog_wordpress-rtr.rule=Host(`$DOMAINNAME_BLOG`,`www.$DOMAINNAME_BLOG`)"
@@ -623,6 +638,9 @@ services:
       WORDPRESS_DB_USER: $WORDPRESS_DB_USER
       WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.myownsite_wordpress-rtr.rule=Host(`$DOMAINNAME`,`www.$DOMAINNAME`)"
@@ -650,6 +668,9 @@ services:
     volumes:
       - '$SERVICESDIR/guacamole:/config'
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.guacamole-rtr.rule=Host(`guacamole.$DOMAINNAME`)"
@@ -661,3 +682,18 @@ services:
       # Service
       - "traefik.http.routers.guacamole-rtr.service=guacamole-svc"
       - "traefik.http.services.guacamole-svc.loadbalancer.server.port=8080"
+
+  # WatchTower - Automatic Docker Container Updates
+  watchtower:
+    image: containrrr/watchtower:armhf-latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      TZ: $TZ
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_REMOVE_VOLUMES: "true"
+      WATCHTOWER_INCLUDE_STOPPED: "true"
+      WATCHTOWER_NO_STARTUP_MESSAGE: "false"
+      WATCHTOWER_SCHEDULE: "0 15 2 * * *" # https://pkg.go.dev/github.com/robfig/cron@v1.2.0#hdr-CRON_Expression_Format
