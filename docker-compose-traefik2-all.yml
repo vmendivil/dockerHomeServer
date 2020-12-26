@@ -106,7 +106,7 @@ services:
   oauth:
     container_name: oauth
     # image: thomseddon/traefik-forward-auth:latest
-    image: thomseddon/traefik-forward-auth:2.1-arm # Use this image with Raspberry Pi
+    image: thomseddon/traefik-forward-auth:2.2.0-arm # Use this image with Raspberry Pi
     restart: always
     networks:
       - t2proxy
@@ -236,7 +236,7 @@ services:
   # Portainer - WebUI for Containers
   portainer:
     container_name: portainer
-    image: portainer/portainer:latest
+    image: portainer/portainer-ce:latest
     restart: always
     command: --no-analytics # -H unix:///var/run/docker.sock
     networks:
@@ -303,7 +303,7 @@ services:
   # Transmission with OpenVpn
   # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
   transmission-openvpn:
-    image: haugene/transmission-openvpn:2.13-armhf #latest-armhf
+    image: haugene/transmission-openvpn:latest #latest-armhf / 2.13-armhf / 3.0.2-armhf
     container_name: transmission-openvpn
     restart: always # If not always, disable WEBPROXY_ENABLED
     networks:
@@ -533,7 +533,7 @@ services:
     #max_execution_time = 600
   blog_wordpress:
     container_name: blog_wordpress
-    image: wordpress:5.5
+    image: wordpress:5.6
     restart: always
     ports:
       - $BLOG_WORDPRESS_PORT:80
@@ -620,7 +620,7 @@ services:
     #max_execution_time = 600
   myownsite_wordpress:
     container_name: myownsite_wordpress
-    image: wordpress:5.5
+    image: wordpress:5.6
     restart: always
     networks:
       - database
