@@ -48,19 +48,21 @@ services:
       - --providers.file.directory=/rules # Load dynamic configuration from one or more .toml or .yml files in a directory.
       - --providers.file.watch=true # Only works on top level files in the rules folder
       # LetsEncrypt HTTP Challenge (enable access on port 80)
-#      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
-#      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
-#      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.httpchallenge.letsencrypt.json # File must have chmod 600
+      - --certificatesresolvers.httpchallenge-letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.httpchallenge-letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.httpchallenge-letsencrypt.acme.storage=/letsencrypt/acme.httpchallenge.letsencrypt.json # File must have chmod 600
+      - --certificatesresolvers.httpchallenge-letsencrypt.acme.email=$CLOUDFLARE_EMAIL
       # LetsEncrypt TLS Challenge (might need comment all references to port 80 and entrypoint.web)
-#      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+#      - --certificatesresolvers.tlschallenge-letsencrypt.acme.tlschallenge=true
       # LetsEncrypt DNS Challenge (add environment variables and ensure tls.domain labels are in place)
-      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.provider=cloudflare
-      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.delayBeforeCheck=5 # Seconds
-      - --certificatesResolvers.letsencrypt.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
-      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.dnschallenge.cloudflare.json # File must have chmod 600
+      - --certificatesResolvers.dnschallenge-cloudflare.acme.dnsChallenge.provider=cloudflare
+      - --certificatesResolvers.dnschallenge-cloudflare.acme.dnsChallenge.delayBeforeCheck=5 # Seconds
+      - --certificatesResolvers.dnschallenge-cloudflare.acme.dnsChallenge.resolvers=1.1.1.1:53,1.0.0.1:53
+      - --certificatesresolvers.dnschallenge-cloudflare.acme.storage=/letsencrypt/acme.dnschallenge.cloudflare.json # File must have chmod 600
+      - --certificatesresolvers.dnschallenge-cloudflare.acme.email=$CLOUDFLARE_EMAIL
       # LetsEncrypt General Config
 #      - --certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory # Only for testing
-      - --certificatesresolvers.letsencrypt.acme.email=$CLOUDFLARE_EMAIL
+#      - --certificatesresolvers.letsencrypt.acme.email=$CLOUDFLARE_EMAIL # Only if noy defined above on each resolver
 #      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json # Ensure no other storage is active on challenges. File must have chmod 600
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -74,12 +76,15 @@ services:
       - CF_API_KEY=$CLOUDFLARE_API_KEY
       - TZ=$TZ
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.traefik-rtr.rule=Host(`traefik.$DOMAINNAME`)"
       - "traefik.http.routers.traefik-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.traefik-rtr.tls=true"
-      - "traefik.http.routers.traefik-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.traefik-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.traefik-rtr.middlewares=chain-oauth@file"
       # Service
@@ -122,12 +127,15 @@ services:
       - DEFAULT_ACTION=auth
       - DEFAULT_PROVIDER=google
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.oauth-rtr.rule=Host(`oauth.$DOMAINNAME`)"
       - "traefik.http.routers.oauth-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.oauth-rtr.tls=true"
-      - "traefik.http.routers.oauth-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.oauth-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.oauth-rtr.middlewares=chain-oauth@file"
       # Service
@@ -206,7 +214,7 @@ services:
     ports:
       - "$DOZZLE_PORT:8080"
     environment:
-      DOZZLE_LEVEL: info
+#      DOZZLE_LEVEL: info
       DOZZLE_TAILSIZE: 300
 #      DOZZLE_FILTER: "status=running"
 #      DOZZLE_FILTER: "label=log_me" # limits logs displayed to containers with this label
@@ -218,7 +226,7 @@ services:
       - "traefik.http.routers.dozzle-rtr.rule=Host(`dozzle.$DOMAINNAME`)"
       - "traefik.http.routers.dozzle-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.dozzle-rtr.tls=true"
-      - "traefik.http.routers.dozzle-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.dozzle-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.dozzle-rtr.middlewares=chain-oauth@file"
       # Service
@@ -243,12 +251,15 @@ services:
     environment:
       - TZ=$TZ
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.portainer-rtr.rule=Host(`portainer.$DOMAINNAME`)"
       - "traefik.http.routers.portainer-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.portainer-rtr.tls=true"
-      - "traefik.http.routers.portainer-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.portainer-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.portainer-rtr.middlewares=chain-oauth@file"
       # Service
@@ -282,7 +293,7 @@ services:
       - "traefik.http.routers.netdata-rtr.rule=Host(`netdata.$DOMAINNAME`)"
       - "traefik.http.routers.netdata-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.netdata-rtr.tls=true"
-      - "traefik.http.routers.netdata-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.netdata-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.netdata-rtr.middlewares=chain-oauth@file"
       # Service
@@ -292,7 +303,7 @@ services:
   # Transmission with OpenVpn
   # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
   transmission-openvpn:
-    image: haugene/transmission-openvpn:2.13-armhf
+    image: haugene/transmission-openvpn:2.13-armhf #latest-armhf
     container_name: transmission-openvpn
     restart: always # If not always, disable WEBPROXY_ENABLED
     networks:
@@ -368,7 +379,7 @@ services:
       - "traefik.http.routers.heimdall-rtr.rule=Host(`heimdall.$DOMAINNAME`)"
       - "traefik.http.routers.heimdall-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.heimdall-rtr.tls=true"
-      - "traefik.http.routers.heimdall-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.heimdall-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.heimdall-rtr.middlewares=chain-oauth@file"
       # Service
@@ -415,12 +426,15 @@ services:
       - $SERVICESDIR/zoneminder/home:/config
       - $ZMVIDEODIR/zoneminder_video/home:/var/cache/zoneminder
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.zoneminder_home-rtr.rule=Host(`zoneminderhome.$DOMAINNAME`)"
       - "traefik.http.routers.zoneminder_home-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.zoneminder_home-rtr.tls=true"
-      - "traefik.http.routers.zoneminder_home-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.zoneminder_home-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.zoneminder_home-rtr.middlewares=chain-zoneminder@file"
       # Service
@@ -479,7 +493,7 @@ services:
       - "traefik.http.routers.nextcloud_home-rtr.rule=Host(`nextcloudhome.$DOMAINNAME`)"
       - "traefik.http.routers.nextcloud_home-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.nextcloud_home-rtr.tls=true"
-      - "traefik.http.routers.nextcloud_home-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.nextcloud_home-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.nextcloud_home-rtr.middlewares=chain-no-auth@file"
       # Service
@@ -539,12 +553,15 @@ services:
       WORDPRESS_DB_USER: $WORDPRESS_BLOG_DB_USER
       WORDPRESS_DB_PASSWORD: $WORDPRESS_BLOG_DB_PASSWORD
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.blog_wordpress-rtr.rule=Host(`$DOMAINNAME_BLOG`,`www.$DOMAINNAME_BLOG`)"
       - "traefik.http.routers.blog_wordpress-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.blog_wordpress-rtr.tls=true"
-      - "traefik.http.routers.blog_wordpress-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.blog_wordpress-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.blog_wordpress-rtr.middlewares=chain-no-auth@file"
       # Service
@@ -615,7 +632,7 @@ services:
     links:
       - myownsite_mariadb
     volumes:
-#      - $MYOWNSITEDIR/myownsite_wordpress/config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Create file in advance
+      - $MYOWNSITEDIR/myownsite_wordpress/config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Create file in advance
       - $MYOWNSITEDIR/myownsite_wordpress/wp-app:/var/www/html # Full wordpress project
     environment:
       WORDPRESS_DB_HOST: myownsite_mariadb
@@ -623,12 +640,15 @@ services:
       WORDPRESS_DB_USER: $WORDPRESS_DB_USER
       WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.myownsite_wordpress-rtr.rule=Host(`$DOMAINNAME`,`www.$DOMAINNAME`)"
       - "traefik.http.routers.myownsite_wordpress-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.myownsite_wordpress-rtr.tls=true"
-      - "traefik.http.routers.myownsite_wordpress-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.myownsite_wordpress-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.myownsite_wordpress-rtr.middlewares=chain-no-auth@file"
       # Service
@@ -650,14 +670,32 @@ services:
     volumes:
       - '$SERVICESDIR/guacamole:/config'
     labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+      # Traefik
       - "traefik.enable=true"
       # Router
       - "traefik.http.routers.guacamole-rtr.rule=Host(`guacamole.$DOMAINNAME`)"
       - "traefik.http.routers.guacamole-rtr.entrypoints=websecure"
 #      - "traefik.http.routers.guacamole-rtr.tls=true"
-      - "traefik.http.routers.guacamole-rtr.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.guacamole-rtr.tls.certresolver=dnschallenge-cloudflare"
       # Middleware
       - "traefik.http.routers.guacamole-rtr.middlewares=chain-oauth@file"
       # Service
       - "traefik.http.routers.guacamole-rtr.service=guacamole-svc"
       - "traefik.http.services.guacamole-svc.loadbalancer.server.port=8080"
+
+  # WatchTower - Automatic Docker Container Updates
+  watchtower:
+    image: containrrr/watchtower:armhf-latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    environment:
+      TZ: $TZ
+      WATCHTOWER_CLEANUP: "true"
+      WATCHTOWER_REMOVE_VOLUMES: "true"
+      WATCHTOWER_INCLUDE_STOPPED: "true"
+      WATCHTOWER_NO_STARTUP_MESSAGE: "false"
+      WATCHTOWER_SCHEDULE: "0 15 2 * * *" # https://pkg.go.dev/github.com/robfig/cron@v1.2.0#hdr-CRON_Expression_Format
