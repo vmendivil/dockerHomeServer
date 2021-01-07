@@ -308,6 +308,11 @@ services:
     restart: always # If not always, disable WEBPROXY_ENABLED
     networks:
       - myvpn
+    cap_add:
+      - NET_ADMIN
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "$TRANSMISSIONOPENVPNGUI:9091" # GUI
       - "$TRANSMISSIONOPENVPN:8888" # Transmission Port
@@ -318,18 +323,21 @@ services:
       - '$DOWNLOADS/torrent:/data' # Downloads
       - '/etc/localtime:/etc/localtime:ro'
     environment:
+      # Vpn setup
       - CREATE_TUN_DEVICE=true
       - OPENVPN_PROVIDER=$OPENVPN_PROVIDER
       # - OPENVPN_CONFIG=CA Toronto # Can be comma separated
       - OPENVPN_USERNAME=$OPENVPN_USERNAME
       - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
-      - WEBPROXY_ENABLED=true # Enable other containers to use the vpn
-      - LOCAL_NETWORK=$LOCAL_NETWORK # Match the local network of the host device
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 # Restart if connection fails
+      - LOCAL_NETWORK=$LOCAL_NETWORK # Match the local network of the host device
       - PUID=$PUID
       - PGID=$PGID
-      - TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED=false
+      # Proxy
+      - WEBPROXY_ENABLED=true # Enable other containers to use the vpn
+      - WEBPROXY_PORT=$TRANSMISSIONOPENVPN
       # Connections
+      - TRANSMISSION_SCRAPE_PAUSED_TORRENTS_ENABLED=false
       - TRANSMISSION_PEER_LIMIT_GLOBAL=1050
       - TRANSMISSION_MAX_PEERS_GLOBAL=1050
       - TRANSMISSION_PEER_LIMIT_PER_TORRENT=50
@@ -346,15 +354,10 @@ services:
       - TRANSMISSION_RATIO_LIMIT_ENABLED=true
       - TRANSMISSION_SPEED_LIMIT_UP=20
       - TRANSMISSION_SPEED_LIMIT_UP_ENABLED=true
-    cap_add:
-      - NET_ADMIN
     logging:
       driver: json-file
       options:
         max-size: 10m
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
 
   # Heimdall Web - Unified Frontend Dashboard
   heimdall:
