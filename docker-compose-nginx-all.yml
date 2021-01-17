@@ -1,0 +1,49 @@
+version: "3.8"
+
+networks:
+  ngproxy:
+    external:
+      name: ngproxy
+
+services:
+
+  # Nginx Proxy Manager
+  nginxmanagerproxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginxmanagerproxy
+    restart: always
+    networks:
+      - ngproxy
+    ports:
+      - 80:80
+      - 81:81 # UI
+      - 443:443
+    volumes:
+      - "$PROXYDIR/nginxmanagerproxy/config.json:/app/config/production.json"
+      - "$PROXYDIR/nginxmanagerproxy/data:/data"
+      - "$PROXYDIR/nginxmanagerproxy/letsencrypt:/etc/letsencrypt"
+    links:
+      - nginxmanagerproxy_mariadb
+    labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"
+
+  # MariaDB
+  nginxmanagerproxy_mariadb:
+    container_name: nginxmanagerproxy_mariadb
+    image: yobasystems/alpine-mariadb:latest
+    restart: always
+    networks:
+      - ngproxy
+    ports:
+      - 3306:3306
+    volumes:
+      - $PROXYDIR/nginxmanagerproxy/mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=ff2R4b24Ka672d8fP62d231cS93c7e0Ga4fa4Z
+      - MYSQL_DATABASE=npm
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=ff2R4b24Ka672d8fP62d231cS93c7e0Ga4fa4Z
+    labels:
+      # WatchTower
+      - "com.centurylinklabs.watchtower.monitor-only=true"

@@ -8,4 +8,6 @@
 #   to fix the issue, run: dos2unix setup_environment.sh
 #
 
-docker-compose -f docker-compose-traefik2-all.yml up -d
+#docker-compose -f docker-compose-traefik2-all.yml up -d
+docker-compose -f docker-compose-nginx-all.yml up -d
+#docker-compose -f docker-compose-traefik2-standalone.yml up -d
