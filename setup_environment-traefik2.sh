@@ -23,7 +23,7 @@ fi
 docker network create t2proxy
 docker network create myvpn
 docker network create database
-docker network create ngproxy
+# docker network create ngproxy
 
 # 3. Check if acme.json exists
 if [ ! -e ./traefik2proxy/letsencrypt/acme.json ]; then
