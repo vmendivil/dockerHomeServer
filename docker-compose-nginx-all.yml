@@ -7,6 +7,9 @@ networks:
   database:
     external:
       name: database
+  myvpn:
+    external:
+      name: myvpn
 
 services:
 
@@ -122,7 +125,7 @@ services:
     container_name: dozzle
     restart: unless-stopped
     networks:
-      - t2proxy
+      - ngproxy
     security_opt:
       - no-new-privileges:true
     ports:
@@ -142,7 +145,7 @@ services:
     restart: always
     command: --no-analytics # -H unix:///var/run/docker.sock
     networks:
-      - t2proxy
+      - ngproxy
     security_opt:
       - no-new-privileges:true
     ports:
@@ -239,7 +242,7 @@ services:
     image: oznu/guacamole:armhf
     restart: always
     networks:
-      - t2proxy
+      - ngproxy
     security_opt:
       - no-new-privileges:true
     ports:
@@ -259,7 +262,7 @@ services:
     hostname: $HOST_NAME # set to fqdn of host
     restart: unless-stopped
     networks:
-      - t2proxy
+      - ngproxy
     ports:
       - $NETDATA_PORT:19999
     cap_add:
@@ -339,7 +342,7 @@ services:
     environment:
       - PUID=$PUID
       - PGID=$PGID
-      - TZ=$timezone
+      - TZ=$TZ
 
   # Heimdall Local - Unified Frontend Alternative
   heimdall_local:
@@ -475,7 +478,7 @@ services:
       - $BLOG_WORDPRESS_PORT:80
     networks:
       - database
-      - t2proxy
+      - ngproxy
     security_opt:
       - no-new-privileges:true
     links:
@@ -501,7 +504,7 @@ services:
     container_name: zoneminder_home
     restart: unless-stopped
     networks:
-      - t2proxy
+      - ngproxy
     security_opt:
       - no-new-privileges:true
     privileged: true
