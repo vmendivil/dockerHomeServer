@@ -306,6 +306,19 @@ services:
       - MYSQL_USER=$MARIADB_USER_NEXTCLOUD
       - MYSQL_PASSWORD=$MARIADB_PASSWORD_NEXTCLOUD
 
+  # Redis
+  nextcloud_home_redis:
+    container_name: nextcloud_home_redis
+    image: redis
+    restart: always
+    command: redis-server --requirepass $REDIS_PASSWORD_NEXTCLOUD
+    ports:
+      - $NEXTCLOUDREDIS:6379
+    networks:
+      - database
+    volumes:
+      - $SERVICESDIR/nextcloud_redis/home/redis/data:/data
+
   # NextCloud
   nextcloud_home:
     container_name: nextcloud_home
@@ -323,6 +336,9 @@ services:
     volumes:
       - $SERVICESDIR/nextcloud/home:/var/www/html
       - $NEXTCLOUDSTORAGEDIR/nextcloud_storage/home:/var/www/html/data
+    environment: 
+      - REDIS_HOST=nextcloud_home_redis
+      - REDIS_HOST_PASSWORD=$REDIS_PASSWORD_NEXTCLOUD
 
 ############################# DASHBOARD
 
