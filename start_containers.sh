@@ -10,4 +10,5 @@
 
 #docker-compose -f docker-compose-traefik2-all.yml up -d
 docker-compose -f docker-compose-nginx-all.yml up -d
+#docker-compose -f docker-compose-nginx-all-ubuntu.yml up -d
 #docker-compose -f docker-compose-traefik2-standalone.yml up -d
