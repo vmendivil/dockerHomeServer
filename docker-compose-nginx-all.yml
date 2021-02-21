@@ -202,7 +202,7 @@ services:
       # Vpn setup
       - CREATE_TUN_DEVICE=true
       - OPENVPN_PROVIDER=$OPENVPN_PROVIDER
-      # - OPENVPN_CONFIG=CA Toronto # Can be comma separated
+      # - OPENVPN_CONFIG=$OPENVPN_CONFIG_FILES # OpenVpn config file names. Can be comma separated
       - OPENVPN_USERNAME=$OPENVPN_USERNAME
       - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
       - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 # Restart if connection fails
@@ -234,6 +234,41 @@ services:
       driver: json-file
       options:
         max-size: 10m
+
+  # Transmission with OpenVpn
+  # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
+  transmission-openvpn-proxyonly:
+    image: haugene/transmission-openvpn:3.0.2-armhf #latest-armhf / 2.13-armhf / 3.0.2-armhf
+    container_name: transmission-openvpn-proxyonly
+    restart: always # If not always, disable WEBPROXY_ENABLED
+    networks:
+      - myvpn
+    cap_add:
+      - NET_ADMIN
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    ports:
+      - "$TRANSMISSIONOPENVPNGUI_ONLYVPN:9091" # GUI
+      - "$TRANSMISSIONOPENVPN_ONLYVPN:8888" # Transmission Port
+    devices:
+      - /dev/net/tun # This creates a tunnel for Transmission
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+    environment:
+      # Vpn setup
+      - CREATE_TUN_DEVICE=true
+      - OPENVPN_PROVIDER=$OPENVPN_PROVIDER
+      - OPENVPN_CONFIG=$OPENVPN_CONFIG_FILES # OpenVpn config file names. Can be comma separated
+      - OPENVPN_USERNAME=$OPENVPN_USERNAME
+      - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
+      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 # Restart if connection fails
+      - LOCAL_NETWORK=$LOCAL_NETWORK # Match the local network of the host device
+      - PUID=$PUID
+      - PGID=$PGID
+      # Proxy
+      - WEBPROXY_ENABLED=true # Enable other containers to use the vpn
+      - WEBPROXY_PORT=8888 # $TRANSMISSIONOPENVPN_ONLYVPN
 
   # Guacamole
       # Create new user and delete default user
