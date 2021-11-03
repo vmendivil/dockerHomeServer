@@ -1,0 +1,10 @@
+{
+  "database": {
+    "engine": "mysql",
+    "host": "db_dockercontainer_name",
+    "name": "npm",
+    "user": "npm",
+    "password": "npm",
+    "port": 3306
+  }
+}

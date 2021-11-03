@@ -1,12 +1,18 @@
 # General
 .env
 
-# Traefik
+# Traefik Exclude
 traefik2proxy/traefik.log
 traefik2proxy/letsencrypt/acme*
 traefik2proxy/rules/middlewares-chains.toml
 traefik2proxy/rules/middlewares.toml
 traefik2proxy/rules/service-openmediavault.toml
 
-# Include
+# Traefik Include
 !traefik2proxy/letsencrypt/acme.json.example
+
+#Nignx Manager Exclude
+nginxmanagerproxy/
+
+#Nigx Manager Include
+!nginxmanagerproxy/config.json.example
