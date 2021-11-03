@@ -85,3 +85,18 @@ services:
       WATCHTOWER_INCLUDE_STOPPED: "true"
       WATCHTOWER_NO_STARTUP_MESSAGE: "false"
       WATCHTOWER_SCHEDULE: "2 30 12 * * *" # Everyday at 2:30 hrs
+
+#  hledger:
+#    container_name: hledger
+#    image: dastapov/hledger
+#    restart: unless-stopped
+#    security_opt:
+#      - no-new-privileges:true
+#    ports:
+#      - "5000:5000"
+#    volumes:
+#      - $SERVICESDIR/hledger/journals:/data
+#    environment:
+#      - PUID=$PUID
+#      - PGID=$PGID
+#      - HLEDGER_JOURNAL_FILE=/data/all.journal
