@@ -160,19 +160,19 @@ services:
       - "com.centurylinklabs.watchtower.monitor-only=true"
 
   # WatchTower - Automatic Docker Container Updates
-  watchtower:
-    image: containrrr/watchtower:armhf-latest
-    container_name: watchtower
-    restart: unless-stopped
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-    environment:
-      TZ: $TZ
-      WATCHTOWER_CLEANUP: "true"
-      WATCHTOWER_REMOVE_VOLUMES: "true"
-      WATCHTOWER_INCLUDE_STOPPED: "true"
-      WATCHTOWER_NO_STARTUP_MESSAGE: "false"
-      WATCHTOWER_SCHEDULE: "0 15 2 * * *" # https://pkg.go.dev/github.com/robfig/cron@v1.2.0#hdr-CRON_Expression_Format
+#  watchtower:
+#    image: containrrr/watchtower:armhf-latest
+#    container_name: watchtower
+#    restart: unless-stopped
+#    volumes:
+#      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+#    environment:
+#      TZ: $TZ
+#      WATCHTOWER_CLEANUP: "true"
+#      WATCHTOWER_REMOVE_VOLUMES: "true"
+#      WATCHTOWER_INCLUDE_STOPPED: "true"
+#      WATCHTOWER_NO_STARTUP_MESSAGE: "false"
+#      WATCHTOWER_SCHEDULE: "0 15 2 * * *" # https://pkg.go.dev/github.com/robfig/cron@v1.2.0#hdr-CRON_Expression_Format
 
 ############################# NETWORK
 
@@ -237,42 +237,42 @@ services:
 
   # Transmission with OpenVpn
   # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
-  transmission-openvpn-proxyonly:
-    image: haugene/transmission-openvpn:3.0.2-armhf #latest-armhf / 2.13-armhf / 3.0.2-armhf
-    container_name: transmission-openvpn-proxyonly
-    restart: always # If not always, disable WEBPROXY_ENABLED
-    networks:
-      - myvpn
-    cap_add:
-      - NET_ADMIN
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    ports:
-      - "$TRANSMISSIONOPENVPNGUI_ONLYVPN:9091" # GUI
-      - "$TRANSMISSIONOPENVPN_ONLYVPN:8888" # Transmission Port
-    devices:
-      - /dev/net/tun # This creates a tunnel for Transmission
-    volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-    environment:
-      # Vpn setup
-      - CREATE_TUN_DEVICE=true
-      - OPENVPN_PROVIDER=$OPENVPN_PROVIDER
-      - OPENVPN_CONFIG=$OPENVPN_CONFIG_FILES # OpenVpn config file names. Can be comma separated
-      - OPENVPN_USERNAME=$OPENVPN_USERNAME
-      - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
-      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 # Restart if connection fails
-      - LOCAL_NETWORK=$LOCAL_NETWORK # Match the local network of the host device
-      - PUID=$PUID
-      - PGID=$PGID
-      # Proxy
-      - WEBPROXY_ENABLED=true # Enable other containers to use the vpn
-      - WEBPROXY_PORT=8888 # $TRANSMISSIONOPENVPN_ONLYVPN
-    logging:
-      driver: json-file
-      options:
-        max-size: 10m
+#  transmission-openvpn-proxyonly:
+#    image: haugene/transmission-openvpn:3.0.2-armhf #latest-armhf / 2.13-armhf / 3.0.2-armhf
+#    container_name: transmission-openvpn-proxyonly
+#    restart: always # If not always, disable WEBPROXY_ENABLED
+#    networks:
+#      - myvpn
+#    cap_add:
+#      - NET_ADMIN
+#    dns:
+#      - 8.8.8.8
+#      - 8.8.4.4
+#    ports:
+#      - "$TRANSMISSIONOPENVPNGUI_ONLYVPN:9091" # GUI
+#      - "$TRANSMISSIONOPENVPN_ONLYVPN:8888" # Transmission Port
+#    devices:
+#      - /dev/net/tun # This creates a tunnel for Transmission
+#    volumes:
+#      - '/etc/localtime:/etc/localtime:ro'
+#    environment:
+#      # Vpn setup
+#      - CREATE_TUN_DEVICE=true
+#      - OPENVPN_PROVIDER=$OPENVPN_PROVIDER
+#      - OPENVPN_CONFIG=$OPENVPN_CONFIG_FILES # OpenVpn config file names. Can be comma separated
+#      - OPENVPN_USERNAME=$OPENVPN_USERNAME
+#      - OPENVPN_PASSWORD=$OPENVPN_PASSWORD
+#      - OPENVPN_OPTS=--inactive 3600 --ping 10 --ping-exit 60 # Restart if connection fails
+#      - LOCAL_NETWORK=$LOCAL_NETWORK # Match the local network of the host device
+#      - PUID=$PUID
+#      - PGID=$PGID
+#      # Proxy
+#      - WEBPROXY_ENABLED=true # Enable other containers to use the vpn
+#      - WEBPROXY_PORT=8888 # $TRANSMISSIONOPENVPN_ONLYVPN
+#    logging:
+#      driver: json-file
+#      options:
+#        max-size: 10m
 
   # Guacamole
       # Create new user and delete default user
@@ -581,20 +581,20 @@ services:
 
   # Plex
   # <your-ip>:32400/web
-  plex:
-    image: linuxserver/plex
-    container_name: plex
-    restart: unless-stopped
-    #security_opt:
-    #  - no-new-privileges:true
-    network_mode: host
-    environment:
-      PUID: $PUID
-      PGID: $PGID
-      VERSION: docker
-      #UMASK: 022
-      #PLEX_CLAIM: #optional
-    volumes:
-      - $SERVICESDIR/plex/config:/config
-      - $PLEX_MOVIES:/movies
-    
+#  plex:
+#    image: linuxserver/plex
+#    container_name: plex
+#    restart: unless-stopped
+#    #security_opt:
+#    #  - no-new-privileges:true
+#    network_mode: host
+#    environment:
+#      PUID: $PUID
+#      PGID: $PGID
+#      VERSION: docker
+#      #UMASK: 022
+#      #PLEX_CLAIM: #optional
+#    volumes:
+#      - $SERVICESDIR/plex/config:/config
+#      - $PLEX_MOVIES_HDD_ONE:/movies_Hdd_One
+#      - $PLEX_MOVIES_HDD_TWO:/movies_Hdd_Two
