@@ -580,13 +580,15 @@ services:
       - "com.centurylinklabs.watchtower.monitor-only=true"
 
   # Plex
-  # <your-ip>:32400/web
+  # <your-ip>:$PLEX_PORT/web
 #  plex:
-#    image: linuxserver/plex
+#    image: linuxserver/plex:arm32v7-bionic-version-1.22.3.4523-d0ce30438
 #    container_name: plex
 #    restart: unless-stopped
-#    #security_opt:
-#    #  - no-new-privileges:true
+#    security_opt:
+#      - no-new-privileges:true
+#    ports:
+#      - "$PLEX_PORT:32400"
 #    network_mode: host
 #    environment:
 #      PUID: $PUID

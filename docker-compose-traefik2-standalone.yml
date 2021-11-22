@@ -100,3 +100,25 @@ services:
 #      - PUID=$PUID
 #      - PGID=$PGID
 #      - HLEDGER_JOURNAL_FILE=/data/all.journal
+
+  # Plex
+  # <your-ip>:$PLEX_PORT/web
+  plex:
+    image: linuxserver/plex:arm32v7-bionic-version-1.22.3.4523-d0ce30438
+    container_name: plex
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "$PLEX_PORT:32400"
+    network_mode: host
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      VERSION: docker
+      #UMASK: 022
+      #PLEX_CLAIM: #optional
+    volumes:
+      - $SERVICESDIR/plex/config:/config
+      - $PLEX_MOVIES_HDD_ONE:/movies_Hdd_One
+      - $PLEX_MOVIES_HDD_TWO:/movies_Hdd_Two
