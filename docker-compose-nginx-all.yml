@@ -600,3 +600,30 @@ services:
 #      - $SERVICESDIR/plex/config:/config
 #      - $PLEX_MOVIES_HDD_ONE:/movies_Hdd_One
 #      - $PLEX_MOVIES_HDD_TWO:/movies_Hdd_Two
+
+############################# CRYPTOGEON
+# Reference: https://www.youtube.com/watch?v=S0jx7wpOfNM&list=WL&index=25&t=592s
+# Create configuration in .env file
+
+#  memcached:
+#    container_name: cryptgeon_memcached
+#    image: memcached:1-alpine
+#    restart: unless-stopped
+#    security_opt:
+#      - no-new-privileges:true
+#    entrypoint: memcached -m 128M -I 4M # Limit to 128 MB Ram, 4M per entry, customize at free will.
+#
+#  cryptgeon:
+#    container_name: cryptgeon
+#    image: cupcakearmy/cryptgeon
+#    restart: unless-stopped
+#    networks:
+#      - ngproxy
+#    security_opt:
+#      - no-new-privileges:true
+#    depends_on:
+#      - memcached
+#    environment:
+#      SIZE_LIMIT: 4M
+#    ports:
+#      - 9754:5000
