@@ -179,7 +179,7 @@ services:
   # Transmission with OpenVpn
   # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
   transmission-openvpn:
-    image: haugene/transmission-openvpn:3.0.2-armhf #latest-armhf / 2.13-armhf / 3.0.2-armhf
+    image: haugene/transmission-openvpn #latest-armhf / 2.13-armhf / 3.0.2-armhf
     container_name: transmission-openvpn
     restart: always # If not always, disable WEBPROXY_ENABLED
     networks:
@@ -238,7 +238,7 @@ services:
   # Transmission with OpenVpn
   # Setup: https://www.youtube.com/watch?v=aPkRz0U_IPo
 #  transmission-openvpn-proxyonly:
-#    image: haugene/transmission-openvpn:3.0.2-armhf #latest-armhf / 2.13-armhf / 3.0.2-armhf
+#    image: haugene/transmission-openvpn
 #    container_name: transmission-openvpn-proxyonly
 #    restart: always # If not always, disable WEBPROXY_ENABLED
 #    networks:
