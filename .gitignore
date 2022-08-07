@@ -1,5 +1,6 @@
 # General
 .env
+shared/.htpasswd
 
 # Traefik Exclude
 traefik2proxy/traefik.log
