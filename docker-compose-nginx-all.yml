@@ -71,6 +71,7 @@ services:
       - RRTYPE=A
       - DELETE_ON_STOP=false
       - DNS_SERVER=1.1.1.1
+      - CRON=0 * * * * # https://crontab.guru/every-5-minutes   https://crontab.guru/every-hour
 
   # Cloudflare DDNS - Dynamic DNS Updater
 #  blog-cf-ddns:
@@ -81,7 +82,7 @@ services:
 #      - no-new-privileges:true
 #    environment:
 #      - API_KEY=$CLOUDFLARE_API_TOKEN
-#      - ZONE=$DOMAINNAME_BLOG
+#      - ZONE= # $WP_DEMO_DOMAIN
 #      - PROXIED=true
 #      - RRTYPE=A
 #      - DELETE_ON_STOP=false
@@ -459,50 +460,50 @@ services:
 #      - PGID=$PGID
 #      - TZ=$TZ
 
-############################# MY OWN SITE VMENDIVIL.COM
+############################# MY OWN SITE
 
   # MariaDB
-#  myownsite_mariadb:
-#    container_name: myownsite_mariadb
-#    image: linuxserver/mariadb:latest
-#    restart: always
-#    networks:
-#      - database
-#    security_opt:
-#      - no-new-privileges:true
-#    ports:
-#      - "$MYOWNSITE_MARIADB_PORT:3306"
-#    volumes:
-#      - $MYOWNSITEDIR/mariadb/data:/config
-#      - $MYOWNSITEDIR/mariadb/mysql:/var/lib/mysql
-#      - /etc/timezone:/etc/timezone:ro
-#      - /etc/localtime:/etc/localtime:ro
-#    environment:
-#      - PUID=$PUID
-#      - PGID=$PGID
-#      - MYSQL_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD
-#      - MYSQL_DATABASE=$WORDPRESS_DB_NAME
-#      - MYSQL_USER=$WORDPRESS_DB_USER
-#      - MYSQL_PASSWORD=$WORDPRESS_DB_PASSWORD
+  myownsite_mariadb:
+    container_name: myownsite_mariadb
+    image: linuxserver/mariadb:latest
+    restart: always
+    networks:
+      - database
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "$MYOWNSITE_MARIADB_PORT:3306"
+    volumes:
+      - $MYOWNSITEDIR/mariadb/data:/config
+      - $MYOWNSITEDIR/mariadb/mysql:/var/lib/mysql
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - MYSQL_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD
+      - MYSQL_DATABASE=$WORDPRESS_DB_NAME
+      - MYSQL_USER=$WORDPRESS_DB_USER
+      - MYSQL_PASSWORD=$WORDPRESS_DB_PASSWORD
 
-#  # PhpMyAdmin
-#  myownsite_phpmyadmin:
-#    image: ebspace/armhf-phpmyadmin
-#    container_name: myownsite_phpmyadmin
-#    restart: unless-stopped
-#    networks:
-#      - database
-#    security_opt:
-#      - no-new-privileges:true
-#    ports:
-#      - $MYOWNSITE_PHPMYADMIN:80
-#    links:
-#      - myownsite_mariadb
-#    environment:
-#      MYSQL_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
-#      PMA_HOST: myownsite_mariadb
-#      PMA_PORT: 3306
-##      PMA_ARBITRARY: 1
+  # PhpMyAdmin
+  myownsite_phpmyadmin:
+    container_name: myownsite_phpmyadmin
+    image: ebspace/armhf-phpmyadmin:latest
+    restart: unless-stopped
+    networks:
+      - database
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $MYOWNSITE_PHPMYADMIN:80
+    links:
+      - myownsite_mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
+      PMA_HOST: myownsite_mariadb
+      PMA_PORT: $PHP_PMA_PORT
+#      PMA_ARBITRARY: 1
     
   # WordPress
     # Create file (volumes) php.conf.uploads.ini and paste below content before container creation:
@@ -511,56 +512,56 @@ services:
     #upload_max_filesize = 64M
     #post_max_size = 64M
     #max_execution_time = 600
-#  myownsite_wordpress:
-#    container_name: myownsite_wordpress
-#    image: wordpress:5.6
-#    restart: always
-#    networks:
-#      - database
-#      - ngproxy
-#    security_opt:
-#      - no-new-privileges:true
-#    ports:
-#      - $MYOWNSITE_WORDPRESS_PORT:80
-#    links:
-#      - myownsite_mariadb
-#    volumes:
-#      - $MYOWNSITEDIR/www/config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Create file in advance
-#      - $MYOWNSITEDIR/www/wp-app:/var/www/html # Full wordpress project
-#    environment:
-#      WORDPRESS_DB_HOST: myownsite_mariadb
-#      WORDPRESS_DB_NAME: $WORDPRESS_DB_NAME
-#      WORDPRESS_DB_USER: $WORDPRESS_DB_USER
-#      WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD
-#    labels:
-#      # WatchTower
-#      - "com.centurylinklabs.watchtower.monitor-only=true"
+  myownsite_wordpress:
+    container_name: myownsite_wordpress
+    image: wordpress:latest
+    restart: always
+    networks:
+      - database
+      - ngproxy
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $MYOWNSITE_WORDPRESS_PORT:80
+    links:
+      - myownsite_mariadb
+    volumes:
+      - $MYOWNSITEDIR/www/config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Create file in advance
+      - $MYOWNSITEDIR/www/wp-app:/var/www/html # Full wordpress project
+    environment:
+      WORDPRESS_DB_HOST: myownsite_mariadb
+      WORDPRESS_DB_NAME: $WORDPRESS_DB_NAME
+      WORDPRESS_DB_USER: $WORDPRESS_DB_USER
+      WORDPRESS_DB_PASSWORD: $WORDPRESS_DB_PASSWORD
+    #labels:
+      ## WatchTower
+      #- "com.centurylinklabs.watchtower.monitor-only=true"
 
-############################# BLOG 30LAMOD.COM
+############################# DEMO SITE
 
   # MariaDB
-#  blog_mariadb:
-#    container_name: blog_mariadb
-#    image: linuxserver/mariadb:latest
-#    restart: always
-#    networks:
-#      - database
-#    security_opt:
-#      - no-new-privileges:true
-#    ports:
-#      - "$BLOG_MARIADB_PORT:3306"
-#    volumes:
-#      - $BLOGDIR/blog_mariadb/data:/config
-#      - $BLOGDIR/blog_mariadb/mysql:/var/lib/mysql
-#      - /etc/timezone:/etc/timezone:ro
-#      - /etc/localtime:/etc/localtime:ro
-#    environment:
-#      - PUID=$PUID
-#      - PGID=$PGID
-#      - MYSQL_ROOT_PASSWORD=$MARIADB_BLOG_ROOT_PASSWORD
-#      - MYSQL_DATABASE=$WORDPRESS_BLOG_DB_NAME
-#      - MYSQL_USER=$WORDPRESS_BLOG_DB_USER
-#      - MYSQL_PASSWORD=$WORDPRESS_BLOG_DB_PASSWORD
+  wordpress_demo_mariadb:
+    container_name: wp_demo_mariadb
+    image: linuxserver/mariadb:latest
+    restart: always
+    networks:
+      - database
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "$WP_DEMO_MARIADB_PORT:3306"
+    volumes:
+      - $WP_DEMO_DIR/mariadb/data:/config
+      - $WP_DEMO_DIR/mariadb/mysql:/var/lib/mysql
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - MYSQL_ROOT_PASSWORD=$WP_DEMO_ROOT_PASSWORD
+      - MYSQL_DATABASE=$WP_DEMO_DB_NAME
+      - MYSQL_USER=$WP_DEMO_DB_USER
+      - MYSQL_PASSWORD=$WP_DEMO_DB_PASSWORD
 
   # WordPress
     # Create file (volumes) php.conf.uploads.ini and paste below content before container creation:
@@ -569,30 +570,27 @@ services:
     #upload_max_filesize = 64M
     #post_max_size = 64M
     #max_execution_time = 600
-#  blog_wordpress:
-#    container_name: blog_wordpress
-#    image: wordpress:5.6
-#    restart: always
-#    ports:
-#      - $BLOG_WORDPRESS_PORT:80
-#    networks:
-#      - database
-#      - ngproxy
-#    security_opt:
-#      - no-new-privileges:true
-#    links:
-#      - blog_mariadb
-#    volumes:
-##      - $BLOGDIR/blog_wordpress/config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Create file in advance
-#      - $BLOGDIR/blog_wordpress/wp-app:/var/www/html # Full wordpress project
-#    environment:
-#      WORDPRESS_DB_HOST: blog_mariadb
-#      WORDPRESS_DB_NAME: $WORDPRESS_BLOG_DB_NAME
-#      WORDPRESS_DB_USER: $WORDPRESS_BLOG_DB_USER
-#      WORDPRESS_DB_PASSWORD: $WORDPRESS_BLOG_DB_PASSWORD
-#    labels:
-#      # WatchTower
-#      - "com.centurylinklabs.watchtower.monitor-only=true"
+  wordpress_demo_wordpress:
+    container_name: wp_demo_website
+    image: wordpress:latest
+    restart: always
+    ports:
+      - $WP_DEMO_WORDPRESS_PORT:80
+    networks:
+      - database
+      - ngproxy
+    security_opt:
+      - no-new-privileges:true
+    links:
+      - wordpress_demo_mariadb
+    volumes:
+      - $WP_DEMO_DIR/www/config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Create file in advance
+      - $WP_DEMO_DIR/www/wp-app:/var/www/html # Full wordpress project
+    environment:
+      WORDPRESS_DB_HOST: wp_demo_mariadb
+      WORDPRESS_DB_NAME: $WP_DEMO_DB_NAME
+      WORDPRESS_DB_USER: $WP_DEMO_DB_USER
+      WORDPRESS_DB_PASSWORD: $WP_DEMO_DB_PASSWORD
 
 ############################# HOME
 
@@ -624,26 +622,26 @@ services:
 #      - "com.centurylinklabs.watchtower.monitor-only=true"
 
   # Plex
-  # <your-ip>:$PLEX_PORT/web
+  # URL to access plex instance: http://<host ip>:$32400/web
 #  plex:
-#    image: linuxserver/plex:arm32v7-bionic-version-1.22.3.4523-d0ce30438
+#    image: linuxserver/plex:latest #ghcr.io/linuxserver/plex:bionic
 #    container_name: plex
 #    restart: unless-stopped
 #    security_opt:
 #      - no-new-privileges:true
-#    ports:
-#      - "$PLEX_PORT:32400"
 #    network_mode: host
 #    environment:
 #      PUID: $PUID
 #      PGID: $PGID
 #      VERSION: docker
-#      #UMASK: 022
-#      #PLEX_CLAIM: #optional
+#      UMASK: 022
+#      #PLEX_CLAIM: #optional: https://www.plex.tv/claim
 #    volumes:
 #      - $SERVICESDIR/plex/config:/config
-#      - $PLEX_MOVIES_HDD_ONE:/movies_Hdd_One
-#      - $PLEX_MOVIES_HDD_TWO:/movies_Hdd_Two
+#      - $PLEX_MOVIES_HDD_ONE:/PlexMoviesAndShows_One
+#      #- $PLEX_MOVIES_HDD_TWO:/movies_Hdd_Two
+#    #devices:
+#      #- /dev/dri:/dev/dri
 
 ############################# CRYPTOGEON
 # Reference: https://www.youtube.com/watch?v=S0jx7wpOfNM&list=WL&index=25&t=592s
