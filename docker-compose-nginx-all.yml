@@ -89,18 +89,16 @@ services:
 #      - DNS_SERVER=1.1.1.1
 
   # Cloudflare tunnel: main site
+  # Other images:
+    # https://hub.docker.com/r/visibilityspots/cloudflared
+    # https://hub.docker.com/r/erisamoe/cloudflared
 #  cloudflared:
 #    container_name: cloudflared_main
 #    image: cloudflare/cloudflared:latest
 #    networks:
 #      - ngproxy
 #    restart: always
-#    command:
-#      - tunnel
-#      - --no-autoupdate
-#      - run
-#      - --token
-#      - $CLOUDFLARED_TOKEN_MAIN
+#    command: command: tunnel --no-autoupdate run --token $CLOUDFLARED_TOKEN_MAIN
 
 ############################# SYSTEM
 
