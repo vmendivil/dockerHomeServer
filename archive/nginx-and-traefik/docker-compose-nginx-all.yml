@@ -108,26 +108,26 @@ services:
     # Other commands: https://www.fail2ban.org/wiki/index.php/Commands
   # Check status of ssh jail:
     # sudo fail2ban-client status sshd
-  fail2ban:
-    container_name: fail2ban
-    image: crazymax/fail2ban:latest
-    restart: always
-    network_mode: host
-    security_opt:
-      - no-new-privileges:true
-    cap_add:
-      - NET_ADMIN
-      - NET_RAW
-    volumes:
-      - /var/log/docker:/var/log/docker
-#      - $SERVICESDIR/hass/home-assistant.log:/var/log/home-assistant.log:ro
-      - $SERVICESDIR/fail2ban:/data
-      - $SERVICESDIR/fail2ban/fail2ban.d:/etc/fail2ban/fail2ban.d
-    environment:
-      - TZ=$TZ
-      - F2B_LOG_LEVEL=INFO
-      - F2B_DB_PURGE_AGE=1d # Age at which bans should be purged from the database
-      - F2B_IPTABLES_CHAIN=DOCKER-USER # Specifies the iptables chain to which the Fail2Ban rules should be added
+#  fail2ban:
+#    container_name: fail2ban
+#    image: crazymax/fail2ban:latest
+#    restart: always
+#    network_mode: host
+#    security_opt:
+#      - no-new-privileges:true
+#    cap_add:
+#      - NET_ADMIN
+#      - NET_RAW
+#    volumes:
+#      - /var/log/docker:/var/log/docker
+##      - $SERVICESDIR/hass/home-assistant.log:/var/log/home-assistant.log:ro
+#      - $SERVICESDIR/fail2ban:/data
+#      - $SERVICESDIR/fail2ban/fail2ban.d:/etc/fail2ban/fail2ban.d
+#    environment:
+#      - TZ=$TZ
+#      - F2B_LOG_LEVEL=INFO
+#      - F2B_DB_PURGE_AGE=1d # Age at which bans should be purged from the database
+#      - F2B_IPTABLES_CHAIN=DOCKER-USER # Specifies the iptables chain to which the Fail2Ban rules should be added
 #      - SSMTP_HOST=smtp.gmail.com
 #      - SSMTP_PORT=465
 #      - SSMTP_USER=$SMTP_EMAIL
@@ -487,23 +487,23 @@ services:
       - MYSQL_PASSWORD=$WORDPRESS_DB_PASSWORD
 
   # PhpMyAdmin
-  myownsite_phpmyadmin:
-    container_name: myownsite_phpmyadmin
-    image: ebspace/armhf-phpmyadmin:latest
-    restart: unless-stopped
-    networks:
-      - database
-    security_opt:
-      - no-new-privileges:true
-    ports:
-      - $MYOWNSITE_PHPMYADMIN:80
-    links:
-      - myownsite_mariadb
-    environment:
-      MYSQL_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
-      PMA_HOST: myownsite_mariadb
-      PMA_PORT: $PHP_PMA_PORT
-#      PMA_ARBITRARY: 1
+#  myownsite_phpmyadmin:
+#    container_name: myownsite_phpmyadmin
+#    image: ebspace/armhf-phpmyadmin:latest
+#    restart: unless-stopped
+#    networks:
+#      - database
+#    security_opt:
+#      - no-new-privileges:true
+#    ports:
+#      - $MYOWNSITE_PHPMYADMIN:80
+#    links:
+#      - myownsite_mariadb
+#    environment:
+#      MYSQL_ROOT_PASSWORD: $MARIADB_ROOT_PASSWORD
+#      PMA_HOST: myownsite_mariadb
+#      PMA_PORT: $PHP_PMA_PORT
+##      PMA_ARBITRARY: 1
     
   # WordPress
     # Create file (volumes) php.conf.uploads.ini and paste below content before container creation:
