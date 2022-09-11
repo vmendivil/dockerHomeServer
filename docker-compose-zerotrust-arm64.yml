@@ -16,62 +16,62 @@ services:
 ############################# PROXY
 
   # Nginx Proxy Manager
-  nginxmanagerproxy:
-    image: 'jc21/nginx-proxy-manager:latest'
-    container_name: nginxmanagerproxy
-    restart: always
-    networks:
-      - ngproxy
-      - database
-    ports:
-      - 80:80
-      - 81:81 # UI
-      - 443:443
-    volumes:
-      - "$PROXYDIR/nginxmanagerproxy/config.json:/app/config/production.json"
-      - "$PROXYDIR/nginxmanagerproxy/data:/data"
-      - "$PROXYDIR/nginxmanagerproxy/letsencrypt:/etc/letsencrypt"
-    links:
-      - nginxmanagerproxy_mariadb
+#  nginxmanagerproxy:
+#    image: 'jc21/nginx-proxy-manager:latest'
+#    container_name: nginxmanagerproxy
+#    restart: always
+#    networks:
+#      - ngproxy
+#      - database
+#    ports:
+#      - 80:80
+#      - 81:81 # UI
+#      - 443:443
+#    volumes:
+#      - "$PROXYDIR/nginxmanagerproxy/config.json:/app/config/production.json"
+#      - "$PROXYDIR/nginxmanagerproxy/data:/data"
+#      - "$PROXYDIR/nginxmanagerproxy/letsencrypt:/etc/letsencrypt"
+#    links:
+#      - nginxmanagerproxy_mariadb
 #    labels:
 #      # WatchTower
 #      - "com.centurylinklabs.watchtower.monitor-only=true"
 
   # MariaDB
-  nginxmanagerproxy_mariadb:
-    container_name: nginxmanagerproxy_mariadb
-    image: yobasystems/alpine-mariadb:latest
-    restart: always
-    networks:
-      - database
-    ports:
-      - 3306:3306
-    volumes:
-      - $PROXYDIR/nginxmanagerproxy/mysql:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=$NGINX_ROOT_PASSWORD
-      - MYSQL_DATABASE=$NGINX_MYSQL_DATABASE
-      - MYSQL_USER=$NGINX_MYSQL_USER
-      - MYSQL_PASSWORD=$NGINX_MYSQL_PASSWORD
+#  nginxmanagerproxy_mariadb:
+#    container_name: nginxmanagerproxy_mariadb
+#    image: yobasystems/alpine-mariadb:latest
+#    restart: always
+#    networks:
+#      - database
+#    ports:
+#      - 3306:3306
+#    volumes:
+#      - $PROXYDIR/nginxmanagerproxy/mysql:/var/lib/mysql
+#    environment:
+#      - MYSQL_ROOT_PASSWORD=$NGINX_ROOT_PASSWORD
+#      - MYSQL_DATABASE=$NGINX_MYSQL_DATABASE
+#      - MYSQL_USER=$NGINX_MYSQL_USER
+#      - MYSQL_PASSWORD=$NGINX_MYSQL_PASSWORD
 #    labels:
 #      # WatchTower
 #      - "com.centurylinklabs.watchtower.monitor-only=true"
 
   # Cloudflare DDNS - Dynamic DNS Updater
-  myownsite-cf-ddns:
-    container_name: myownsite-cf-ddns
-    image: oznu/cloudflare-ddns:latest
-    restart: always
-    security_opt:
-      - no-new-privileges:true
-    environment:
-      - API_KEY=$CLOUDFLARE_API_TOKEN
-      - ZONE=$DOMAINNAME
-      - PROXIED=true
-      - RRTYPE=A
-      - DELETE_ON_STOP=false
-      - DNS_SERVER=1.1.1.1
-      - CRON=0 * * * * # https://crontab.guru/every-5-minutes   https://crontab.guru/every-hour
+#  myownsite-cf-ddns:
+#    container_name: myownsite-cf-ddns
+#    image: oznu/cloudflare-ddns:latest
+#    restart: always
+#    security_opt:
+#      - no-new-privileges:true
+#    environment:
+#      - API_KEY=$CLOUDFLARE_API_TOKEN
+#      - ZONE=$DOMAINNAME
+#      - PROXIED=true
+#      - RRTYPE=A
+#      - DELETE_ON_STOP=false
+#      - DNS_SERVER=1.1.1.1
+#      - CRON=0 * * * * # https://crontab.guru/every-5-minutes   https://crontab.guru/every-hour
 
   # Cloudflare DDNS - Dynamic DNS Updater
 #  blog-cf-ddns:
@@ -92,13 +92,15 @@ services:
   # Other images:
     # https://hub.docker.com/r/visibilityspots/cloudflared
     # https://hub.docker.com/r/erisamoe/cloudflared
-#  cloudflared:
-#    container_name: cloudflared_main
-#    image: cloudflare/cloudflared:latest
-#    networks:
-#      - ngproxy
-#    restart: always
-#    command: command: tunnel --no-autoupdate run --token $CLOUDFLARED_TOKEN_MAIN
+  cloudflared:
+    container_name: cloudflared_services
+    image: cloudflare/cloudflared:latest
+    networks:
+      - ngproxy
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    command: tunnel --no-autoupdate run --token $CLOUDFLARED_TOKEN_MAIN
 
 ############################# SYSTEM
 
