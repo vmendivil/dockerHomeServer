@@ -178,13 +178,13 @@ services:
     environment:
       WORDPRESS_DB_HOST: wp_siteone_mariadb
       WORDPRESS_DB_NAME: $WP_SITEONE_DB_NAME
-      WP_SITEONE_DB_USER: $WP_SITEONE_DB_USER
-      WP_SITEONE_DB_PASSWORD: $WP_SITEONE_DB_PASSWORD
+      WORDPRESS_DB_USER: $WP_SITEONE_DB_USER
+      WORDPRESS_DB_PASSWORD: $WP_SITEONE_DB_PASSWORD
 
 ############################# DEMO SITE
 
   # MariaDB
-  wordpress_demo_mariadb:
+  wp_demo_mariadb:
     container_name: wp_demo_mariadb
     image: linuxserver/mariadb:latest
     restart: always
@@ -212,8 +212,8 @@ services:
       #upload_max_filesize = 64M
       #post_max_size = 64M
       #max_execution_time = 600
-  wordpress_demo_wordpress:
-    container_name: wp_demo_website
+  wp_demo_wordpress:
+    container_name: wp_demo_wordpress
     image: wordpress:latest
     restart: always
     ports:
@@ -221,12 +221,12 @@ services:
     security_opt:
       - no-new-privileges:true
     links:
-      - wordpress_demo_mariadb
+      - wp_demo_mariadb
     volumes:
       - $WP_DEMO_DIR/www/config/php.conf.uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Create file in advance
       - $WP_DEMO_DIR/www/wp-app:/var/www/html # Full wordpress project
     environment:
       WORDPRESS_DB_HOST: wp_demo_mariadb
       WORDPRESS_DB_NAME: $WP_DEMO_DB_NAME
-      WP_SITEONE_DB_USER: $WP_DEMO_DB_USER
-      WP_SITEONE_DB_PASSWORD: $WP_DEMO_DB_PASSWORD
+      WORDPRESS_DB_USER: $WP_DEMO_DB_USER
+      WORDPRESS_DB_PASSWORD: $WP_DEMO_DB_PASSWORD
