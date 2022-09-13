@@ -22,7 +22,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "$DOZZLE_PORT:8080"
+      - $DOZZLE_PORT:8080
     environment:
 #      DOZZLE_LEVEL: info
       DOZZLE_TAILSIZE: 300
@@ -43,13 +43,13 @@ services:
       - 8.8.8.8
       - 8.8.4.4
     ports:
-      - "$TRANSMISSIONOPENVPN_GUI_PORT:9091" # GUI
-      - "$TRANSMISSIONOPENVPN_PORT:8888" # Transmission Port
+      - $TRANSMISSIONOPENVPN_GUI_PORT:9091 # GUI
+      - $TRANSMISSIONOPENVPN_PORT:8888 # Transmission Port
     devices:
       - /dev/net/tun # This creates a tunnel for Transmission
     volumes:
       - '$SERVICES_DIR/transmissionopenvpn:/config'
-      - '$DOWNLOADS/torrent:/data' # Downloads
+      - '$DOWNLOADS_DIR/torrent:/data' # Downloads
       - '/etc/localtime:/etc/localtime:ro'
     environment:
       # Vpn setup
@@ -113,6 +113,19 @@ services:
       - net.ipv4.ip_forward=$WIREGUARD_IP_FORWARD
       - net.ipv4.conf.all.src_valid_mark=$WIREGUARD_ALL_SRV_VALID
 
+############################# MONITORING
+
+  uptime_kuma:
+    container_name: uptime_kuma
+    image: louislam/uptime-kuma
+    restart: unless-stopped
+    ports:
+      - $UPTIMEKUMA_PORT:3001
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - $SERVICES_DIR/uptime_kuma:/app/data
+
 ############################# DASHBOARD
 
   # Heimdall Web - Unified Frontend Dashboard
@@ -123,7 +136,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "$HEIMDALL_PORT:80"
+      - $HEIMDALL_PORT:80
     volumes:
       - $SERVICES_DIR/heimdall:/config
     environment:
@@ -141,7 +154,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "$WP_SITEONE_MARIADB_PORT:3306"
+      - $WP_SITEONE_MARIADB_PORT:3306
     volumes:
       - $WP_SITEONE_DIR/mariadb/data:/config
       - $WP_SITEONE_DIR/mariadb/mysql:/var/lib/mysql
@@ -191,7 +204,7 @@ services:
     security_opt:
       - no-new-privileges:true
     ports:
-      - "$WP_DEMO_MARIADB_PORT:3306"
+      - $WP_DEMO_MARIADB_PORT:3306
     volumes:
       - $WP_DEMO_DIR/mariadb/data:/config
       - $WP_DEMO_DIR/mariadb/mysql:/var/lib/mysql
