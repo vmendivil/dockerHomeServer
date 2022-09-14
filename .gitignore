@@ -1,3 +1,2 @@
 # .env files
-.env
-dockerhomeserver-zerotrust-arm64-v0.env
+*.env
