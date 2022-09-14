@@ -48,9 +48,9 @@ services:
     devices:
       - /dev/net/tun # This creates a tunnel for Transmission
     volumes:
-      - '$SERVICES_DIR/transmissionopenvpn:/config'
-      - '$DOWNLOADS_DIR/torrent:/data' # Downloads
-      - '/etc/localtime:/etc/localtime:ro'
+      - $SERVICES_DIR/transmissionopenvpn:/config
+      - $DOWNLOADS_DIR/torrent:/data # Downloads
+      - /etc/localtime:/etc/localtime:ro
     environment:
       # Vpn setup
       - CREATE_TUN_DEVICE=true
@@ -105,7 +105,7 @@ services:
       - WG_PERSISTENT_KEEPALIVE=$WIREGUARD_KEEPALIVE
       - WG_DEFAULT_DNS=$WIREGUARD_DNS
     volumes:
-      - '$SERVICES_DIR/wireguard_easy:/etc/wireguard'
+      - $SERVICES_DIR/wireguard_easy:/etc/wireguard
     cap_add:
       - NET_ADMIN
       - SYS_MODULE

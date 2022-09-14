@@ -1,0 +1,23 @@
+############################# MEDIA
+
+  # Plex
+  # URL to access plex instance: http://<host ip>:$32400/web
+  plex:
+    image: linuxserver/plex:latest
+    container_name: plex
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    network_mode: host
+    environment:
+      PUID: $PUID
+      PGID: $PGID
+      VERSION: docker
+      #UMASK: 022
+      #PLEX_CLAIM: #optional: https://www.plex.tv/claim
+    volumes:
+      - $SERVICES_DIR/plex/config:/config
+      - $PLEX_MOVIES_HDD_ONE:/PlexMoviesAndShows_One
+      #- $PLEX_MOVIES_HDD_TWO:/movies_Hdd_Two
+    #devices:
+      #- /dev/dri:/dev/dri
