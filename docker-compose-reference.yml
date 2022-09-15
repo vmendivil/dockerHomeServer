@@ -17,7 +17,7 @@
       #PLEX_CLAIM: #optional: https://www.plex.tv/claim
     volumes:
       - $SERVICES_DIR/plex/config:/config
-      - $PLEX_MOVIES_HDD_ONE:/PlexMoviesAndShows_One
-      #- $PLEX_MOVIES_HDD_TWO:/movies_Hdd_Two
+      #- $PLEX_MOVIES_HDD_ONE_DIR:/PlexMoviesAndShows_One
+      #- $PLEX_MOVIES_HDD_TWO_DIR:/movies_Hdd_Two
     #devices:
       #- /dev/dri:/dev/dri
