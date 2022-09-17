@@ -237,3 +237,25 @@ services:
       WORDPRESS_DB_NAME: $WP_DEMO_DB_NAME
       WORDPRESS_DB_USER: $WP_DEMO_DB_USER
       WORDPRESS_DB_PASSWORD: $WP_DEMO_DB_PASSWORD
+
+############################# PRODUCTIVITY
+
+  # Visual Code Server
+  visualcode_server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: visualcode_server
+    ports:
+      - $VISUALCODE_SERVER_PORT:8443
+    restart: unless-stopped
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      #- PASSWORD=password #optional
+      #- HASHED_PASSWORD= #optional
+      #- SUDO_PASSWORD=password #optional
+      #- SUDO_PASSWORD_HASH= #optional
+      - PROXY_DOMAIN=$VISUALCODE_SERVER_PROXY_DOMAIN
+      - DEFAULT_WORKSPACE=/config/workspace
+    volumes:
+      - $SERVICES_DIR/visualcode_server/config:/config
