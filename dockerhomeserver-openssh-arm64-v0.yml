@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+
+############################# SYSTEM
+
+  # Connect using: ssh -i /path/to/private/key -p PORT USER_NAME@SERVERIP
+  openssh-server:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: openssh-server
+    hostname: $OPENSSHSERVER_HOSTNAME
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      #- PUBLIC_KEY=yourpublickey #optional
+      #- PUBLIC_KEY_FILE=/path/to/file #optional
+      #- PUBLIC_KEY_DIR=/path/to/directory/containing/_only_/pubkeys #optional
+      #- PUBLIC_KEY_URL=https://github.com/username.keys #optional
+      - SUDO_ACCESS=$OPENSSHSERVER_SUDO_ACCESS
+      - PASSWORD_ACCESS=$OPENSSHSERVER_PASSWORD_ACCESS # optional
+      - USER_NAME=$OPENSSHSERVER_USER_NAME #optional
+      - USER_PASSWORD=$OPENSSHSERVER_USER_PASSWORD #optional
+      #- USER_PASSWORD_FILE=/path/to/file #optional
+    volumes:
+      - $SERVICES_DIR/openssh_server/config:/config
+    ports:
+      - $OPENSSHSERVER_PORT:2222
+    
