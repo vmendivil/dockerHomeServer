@@ -1,3 +1,29 @@
+############################# NETWORK
+
+  # https://hub.docker.com/r/futuretense/nordvpnwgconf
+  # https://forum.gl-inet.com/t/nordlynx2wireguard-wireguard-configuration-generation-in-a-docker-service/20605
+  nordvpnwgconf:
+    image: futuretense/nordvpnwgconf:latest
+    container_name: nordvpnwgconf
+    sysctls:
+      - net.ipv6.conf.all.disable_ipv6=1  # Recomended if using ipv4 only
+    network_mode: bridge
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    volumes:
+      - $SERVICES_DIR/nordvpnwgconf/conf:/conffiles
+    devices:
+      - /dev/net/tun
+    environment:
+      - USER=$NORDVPNWGCONFIG_USER
+      - PASS=$NORDVPNWGCONFIG_PASS
+      - CONNECT=$NORDVPNWGCONFIG_CONNECT
+      - TECHNOLOGY=NordLynx
+      - NETWORK=$NORDVPNWGCONFIG_NETWORK
+    ports:
+      - $NORDVPNWGCONFIG_PORT:8087
+
 ############################# MEDIA
 
   # Plex
