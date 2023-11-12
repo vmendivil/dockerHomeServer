@@ -38,12 +38,14 @@ services:
 
   # AdGuard Home - DNS AdBlocking
   # https://www.smarthomebeginner.com/adguard-home-docker-compose-guide/
+  # Run to create bridge between host and macvlan, and run on every OS reboot/restart:
+  #     sudo ip link add dns_bridge_vlan link eth0 type macvlan mode bridge && sudo ip addr add 192.168.1.16/32 dev dns_bridge_vlan && sudo ip link set dns_bridge_vlan up && sudo ip route add 192.168.1.15/32 dev dns_bridge_vlan
   adguardhome:
     container_name: adguardhome
     image: adguard/adguardhome
     security_opt:
       - no-new-privileges:true
-    restart: unless-stopped
+    restart: always
     # profiles: ["core", "all"]
     networks:
       dockervlan:
