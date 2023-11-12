@@ -1,0 +1,71 @@
+version: "3.8"
+
+services:
+
+############################# NEXTCLOUD
+
+  # Nextcloud
+  nextcloud:
+    image: linuxserver/nextcloud
+    container_name: nextcloud
+    restart: always
+    ports:
+      - $NEXTCLOUD_PORT:443
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      # Database
+      #- MYSQL_HOST=nextcloud_mariadb
+      #- MYSQL_DATABASE=$NEXTCLOUD_MYSQL_DATABASE
+      #- MYSQL_USER=$NEXTCLOUD_MYSQL_USER
+      #- MYSQL_PASSWORD=$NEXTCLOUD_MYSQL_PASSWORD
+      # Redis
+      #- REDIS_HOST=nextcloud_redis
+      #- REDIS_PORT=$NEXTCLOUD_REDIS_PORT
+      #- REDIS_HOST_PASSWORD=$NEXTCLOUD_REDIS_PASSWORD
+      # Domains
+      #- TRUSTED_PROXIES=$NEXTCLOUD_TRUSTEDPROXIES
+      #- NEXTCLOUD_TRUSTED_DOMAINS=$NEXTCLOUD_TRUSTEDDOMAINS
+    volumes:
+      - $NEXTCLOUD_DATA_DIR:/data
+      - $NEXTCLOUD_DIR/server/config:/config
+      - $NEXTCLOUD_DIR/server/app:/var/www/html
+    depends_on:
+      - nextcloud_mariadb
+      - nextcloud_redis
+
+  # Nextcloud Database
+  nextcloud_mariadb:
+    image: linuxserver/mariadb:latest
+    container_name: nextcloud_mariadb
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $NEXTCLOUD_MARIADB_PORT:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=$NEXTCLOUD_MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$NEXTCLOUD_MYSQL_DATABASE
+      - MYSQL_USER=$NEXTCLOUD_MYSQL_USER
+      - MYSQL_PASSWORD=$NEXTCLOUD_MYSQL_PASSWORD
+    volumes:
+      - $NEXTCLOUD_DIR/mariadb/config:/config
+      - $NEXTCLOUD_DIR/mariadb/db:/var/lib/mysql
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+  # Nextcloud Redis
+  nextcloud_redis:
+    image: redis
+    container_name: nextcloud_redis
+    restart: always
+    command: redis-server --requirepass $NEXTCLOUD_REDIS_PASSWORD
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $NEXTCLOUD_REDIS_PORT:6379
+    volumes:
+      - $NEXTCLOUD_DIR/redis/data:/data
