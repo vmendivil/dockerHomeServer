@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+
+############################# FILE SYSTEM
+
+  # Syncthing
+  # Setup: https://www.addictedtotech.net/installing-syncthing-on-a-raspberry-pi-using-docker-portainer-episode-11/
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    container_name: syncthing
+    hostname: syncthing
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $SYNCTHING_UI:8384
+      - $SYNCTHING_TCP:22000/tcp
+      - $SYNCTHING_UDP:22000/udp
+      - $SYNCTHING_UDP_DISCOVERY:21027/udp
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+    volumes:
+      - $SERVICES_DIR/syncthing/config:/config
+      - $SERVICES_DIR/syncthing/sync:/sync
+      #- /path/to/data2:/data2
