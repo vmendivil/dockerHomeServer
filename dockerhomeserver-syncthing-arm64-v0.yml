@@ -23,6 +23,6 @@ services:
       - PGID=$PGID
       - TZ=$TZ
     volumes:
-      - $SERVICES_DIR/syncthing/config:/config
+      - $SERVICES_DIR/syncthing/config:/config # In-app, change default folder to /config/Sync under Actions >> Settings >> Edit folder defaults
       #- /path/to/data2:/data1
       #- /path/to/data2:/data2
