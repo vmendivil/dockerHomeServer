@@ -9,7 +9,7 @@ services:
   syncthing:
     image: lscr.io/linuxserver/syncthing:latest
     container_name: syncthing
-    hostname: syncthing
+    hostname: $SYNCTHING_HOSTNAME
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -24,5 +24,5 @@ services:
       - TZ=$TZ
     volumes:
       - $SERVICES_DIR/syncthing/config:/config
-      - $SERVICES_DIR/syncthing/sync:/sync
+      #- /path/to/data2:/data1
       #- /path/to/data2:/data2
