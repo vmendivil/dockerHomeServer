@@ -1,0 +1,44 @@
+version: "3.9"
+
+networks:
+
+  dockervlan:
+    name: dockervlan
+    driver: macvlan
+    driver_opts:
+      parent: eth0 # using ifconfig
+    ipam:
+      config:
+        - subnet: $DOCKERVLAN_SUBNET
+          ip_range: $DOCKERVLAN_IP_RANGE
+          gateway: $DOCKERVLAN_GATEWAY
+
+############################# NETWORK
+
+  # AdGuard Home - DNS AdBlocking
+  # https://www.smarthomebeginner.com/adguard-home-docker-compose-guide/
+  # Run to create bridge between host and macvlan, and run on every OS reboot/restart, change ip addresses as needed:
+  #     sudo ip link add dns_bridge_vlan link eth0 type macvlan mode bridge && sudo ip addr add 192.168.1.16/32 dev dns_bridge_vlan && sudo ip link set dns_bridge_vlan up && sudo ip route add 192.168.1.15/32 dev dns_bridge_vlan
+  adguardhome:
+    container_name: adguardhome
+    image: adguard/adguardhome
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    # profiles: ["core", "all"]
+    networks:
+      dockervlan:
+        ipv4_address: $ADGUARDHOME_IPV4_ADDRESS
+    ports:
+      - 53/udp 
+      - 67/udp 
+      - 68/tcp 
+      - 68/udp 
+      - 80/tcp 
+      - 443/tcp 
+      - 853/tcp 
+      - 3000/tcp 
+    volumes:
+      - $SERVICES_DIR/adguard/conf:/opt/adguardhome/conf 
+      - $SERVICES_DIR/adguard/work:/opt/adguardhome/work 
+      #- $DOCKERDIR/shared/certs/$DOMAINNAME_HOME_SYNOLOGY:/certs
