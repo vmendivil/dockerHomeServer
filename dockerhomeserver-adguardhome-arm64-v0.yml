@@ -1,10 +1,10 @@
 version: "3.9"
 
 networks:
-
-  dockervlan:
-    name: dockervlan
+  adguardhome_macvlan:
+    name: adguardhome_macvlan
     driver: macvlan
+    #enable_ipv6: false
     driver_opts:
       parent: eth0 # using ifconfig
     ipam:
@@ -13,13 +13,26 @@ networks:
           ip_range: $DOCKERVLAN_IP_RANGE
           gateway: $DOCKERVLAN_GATEWAY
 
+#  vlan_bridge:
+#    name: docker_vlan_bridge
+#    driver: bridge
+#    enable_ipv6: false
+#    ipam:
+#      config:
+#        - subnet: $DOCKERVLAN_BRIDGE_SUBNET
+#          ip_range: $DOCKERVLAN_BRIDGE_IP_RANGE
+#          gateway: $DOCKERVLAN_BRIDGE_GATEWAY
+
+services:
+
 ############################# NETWORK
 
   # AdGuard Home - DNS AdBlocking
-  # https://www.smarthomebeginner.com/adguard-home-docker-compose-guide/
   # https://samuelsson.dev/install-adguard-home-with-docker-on-a-raspberry-pi-4/
-  # Run to create bridge between host and macvlan, and run on every OS reboot/restart, change ip addresses as needed:
-  #     sudo ip link add dns_bridge_vlan link eth0 type macvlan mode bridge && sudo ip addr add 192.168.1.16/32 dev dns_bridge_vlan && sudo ip link set dns_bridge_vlan up && sudo ip route add 192.168.1.15/32 dev dns_bridge_vlan
+  # https://www.smarthomebeginner.com/adguard-home-docker-compose-guide/
+  #   Run to create bridge between host and macvlan, and run on every OS reboot/restart, change ip addresses as needed:
+  #     First ip is the ip of the bridge, second ip is the ip of the DOCKERVLAN_IP_RANGE variable
+  #       sudo ip link add aghbridge link eth0 type macvlan mode bridge && sudo ip addr add 192.168.20.41/32 dev aghbridge && sudo ip link set aghbridge up && sudo ip route add 192.168.20.40/32 dev aghbridge
   adguardhome:
     container_name: adguardhome
     image: adguard/adguardhome
@@ -28,8 +41,10 @@ networks:
     restart: always
     # profiles: ["core", "all"]
     networks:
-      dockervlan:
+      adguardhome_macvlan:
         ipv4_address: $ADGUARDHOME_IPV4_ADDRESS
+      #vlan_bridge:
+      #  ipv4_address: $ADGUARDHOME_IPV4_BRIDGE_ADDRESS
     ports:
       - 53/udp 
       - 67/udp 
