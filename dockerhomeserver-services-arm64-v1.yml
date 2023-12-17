@@ -48,6 +48,20 @@ services:
       - net.ipv4.ip_forward=$WIREGUARD_IP_FORWARD
       - net.ipv4.conf.all.src_valid_mark=$WIREGUARD_ALL_SRV_VALID
 
+  # Open Speed-Test
+  # https://github.com/openspeedtest/Speed-Test
+  openspeedtest:
+    image: openspeedtest/latest
+    container_name: openspeedtest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $OPENSPEEDTEST_HTTP_UI_PORT:3000
+      - $OPENSPEEDTEST_HTTPS_UI_PORT:3001
+
+############################# TOOLS
+
 #  firefox:
 #    image: linuxserver/firefox:latest
 #    container_name: firefox
