@@ -23,6 +23,26 @@ services:
 
 ############################# NETWORK
 
+  # DuckDNS
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: duckdns
+    restart: always
+    #network_mode: host #optional
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=$PUID
+      - PGID=$PGID
+      - TZ=$TZ
+      - SUBDOMAINS=$DUCKDNS_SUBDOMAINS
+      - TOKEN=$DUCKDNS_TOKEN
+      - UPDATE_IP=$DUCKDNS_UPDATE_IP
+      - LOG_FILE=true
+    volumes:
+      - $SERVICES_DIR/duckdns/config:/config
+
+  # Transmission OpenVPN
   transmission_openvpn:
     image: haugene/transmission-openvpn:3.0.2-armhf #latest-armhf / 2.13-armhf / 3.0.2-armhf
     container_name: transmission_openvpn
