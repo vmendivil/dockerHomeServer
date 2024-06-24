@@ -86,7 +86,7 @@ services:
   # Dashy
   dashy:
     container_name: dashy
-    image: lissy93/dashy:latest # arm64v8
+    image: lissy93/dashy:2.1.2 # arm64v8 / 2.1.2
     ports:
       - $DASHY_PORT:80
     restart: always
