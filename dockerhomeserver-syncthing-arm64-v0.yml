@@ -25,4 +25,6 @@ services:
     volumes:
       - $SERVICES_DIR/syncthing/config:/config # In-app, change default folder to /config/Sync under Actions >> Settings >> Edit folder defaults
       - $SYNCTHING_DATA1:/SyncData1
+      - $SYNCTHING_DATA2:/SyncData2
+      - $SYNCTHING_DATA3:/SyncData3
       #- /path/to/data2:/data2
