@@ -103,6 +103,15 @@ services:
       #retries: 3
       #start_period: 40s
 
+  #dashy3:
+  #  container_name: dashy3
+  #  image: lissy93/dashy:latest
+  #  restart: always
+  #  ports:
+  #    - $DASHY3_PORT:8080
+  #  volumes:
+  #    - $SERVICES_DIR/dashy3/user-data/conf.yml:/app/user-data/conf.yml # Create file in advance / mkdir dashy / touch config.yml
+
 ############################# DEMO SITE
 
   ## MariaDB
