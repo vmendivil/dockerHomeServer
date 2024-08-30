@@ -3,3 +3,4 @@
 
 # Syncthing files
 .stignore
+syncthing-folder*
