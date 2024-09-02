@@ -47,3 +47,21 @@ services:
 #    sysctls:
 #      - net.ipv4.ip_forward=$WIREGUARD_IP_FORWARD
 #      - net.ipv4.conf.all.src_valid_mark=$WIREGUARD_ALL_SRV_VALID
+
+############################# MONITORING
+
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $PGADMIN_PORT:80
+      - $PGADMIN_TLS_PORT:443
+    environment:
+      PGADMIN_DEFAULT_EMAIL: $PGADMIN4_USERNAME
+      PGADMIN_DEFAULT_PASSWORD: $PGADMIN4_PASSWORD
+    #volumes:
+      #- $SERVICES_DIR/pgadmin4/data:/var/lib/pgadmin # Might be some issues with permissions
+      #- $SERVICES_DIR/pgadmin4/config:/pgadmin4

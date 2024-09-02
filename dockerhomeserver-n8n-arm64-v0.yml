@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+      #- label:disable
+    ports:
+      - $N8N_PORT:5678
+    links:
+      - n8n_db
+    depends_on:
+      n8n_db:
+        condition: service_healthy
+    environment:
+      - NODE_ENV=$N8N_NODE_ENV
+      # Database
+      - DB_TYPE=$N8N_DB_TYPE
+      - DB_POSTGRESDB_HOST=$N8N_DATABASE_SERVER_HOST
+      - DB_POSTGRESDB_PORT=$N8N_POSTGRESDB_PORT
+      - DB_POSTGRESDB_DATABASE=$N8N_DATABASE_NAME
+      - DB_POSTGRESDB_USER=$N8N_DATABASE_USER
+      - DB_POSTGRESDB_PASSWORD=$N8N_DATABASE_PASSWORD
+      # Deployment
+      - N8N_ENCRYPTION_KEY=$N8N_ENCRYPTION_KEY
+      - N8N_HOST=$N8N_HOST
+      - N8N_PROTOCOL=$N8N_PROTOCOL
+      # Endpoints
+      #- N8N_ENDPOINT_REST=
+      - WEBHOOK_URL=$N8N_WEBHOOK_URL
+      # Security
+      - N8N_SECURE_COOKIE=$N8N_SECURE_COOKIE
+      # Timezone and localization
+      - GENERIC_TIMEZONE=$TZ
+    volumes:
+      - $SERVICES_DIR/n8n/app:/home/node/.n8n
+      - $SERVICES_DIR/n8n/files:/files
+    # Fix the issue accessing the volume for .n8n:
+    #stdin_open: true
+    #tty: true
+    user: $N8N_RUNAS
+
+  
+  n8n_db:
+    image: postgres:16-alpine
+    container_name: n8n_db
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - $N8N_POSTGRESDB_PORT:5432
+    environment:
+      POSTGRES_USER: $N8N_DATABASE_USER
+      POSTGRES_PASSWORD: $N8N_DATABASE_PASSWORD
+      POSTGRES_DB: $N8N_DATABASE_NAME
+    volumes:
+      - $SERVICES_DIR/n8n/db/data:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $N8N_DATABASE_USER -d $N8N_DATABASE_NAME"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
