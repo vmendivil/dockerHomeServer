@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  anythingllm:
+    image: mintplexlabs/anythingllm:master
+    container_name: anythingllm_container
+    restart: unless-stopped
+    ports:
+      - $ANYTHINGLLM_PORT:3001
+    security_opt:
+      - no-new-privileges:true
+    cap_add:
+      - SYS_ADMIN
+    environment:
+      STORAGE_DIR: /app/server/storage
+    volumes:
+      - $SERVICES_DIR/anythingllm/app/server/storage:/app/server/storage
+      - $SERVICES_DIR/anythingllm/.env:/app/server/.env # Create this file in advance
+    user: $ANYTHINGLLM_RUNAS
