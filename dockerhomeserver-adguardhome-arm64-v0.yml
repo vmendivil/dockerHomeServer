@@ -1,27 +1,25 @@
-version: "3.9"
-
 networks:
   adguardhome_macvlan:
     name: adguardhome_macvlan
     driver: macvlan
-    #enable_ipv6: false
+    enable_ipv6: false
     driver_opts:
       parent: eth0 # using ifconfig
     ipam:
       config:
         - subnet: $DOCKERVLAN_SUBNET
-          ip_range: $DOCKERVLAN_IP_RANGE
+          ip_range: $ADGUARDHOME_IPV4_ADDRESS/32
           gateway: $DOCKERVLAN_GATEWAY
 
-#  vlan_bridge:
-#    name: docker_vlan_bridge
-#    driver: bridge
-#    enable_ipv6: false
-#    ipam:
-#      config:
-#        - subnet: $DOCKERVLAN_BRIDGE_SUBNET
-#          ip_range: $DOCKERVLAN_BRIDGE_IP_RANGE
-#          gateway: $DOCKERVLAN_BRIDGE_GATEWAY
+  adguardhome_vlan_bridge:
+    name: adguardhome_vlan_bridge
+    driver: bridge
+    enable_ipv6: false
+    ipam:
+      config:
+        - subnet: $DOCKERVLAN_BRIDGE_SUBNET
+          ip_range: $ADGUARDHOME_IPV4_BRIDGE_ADDRESS/32
+          gateway: $DOCKERVLAN_BRIDGE_GATEWAY
 
 services:
 
@@ -43,17 +41,30 @@ services:
     networks:
       adguardhome_macvlan:
         ipv4_address: $ADGUARDHOME_IPV4_ADDRESS
-      #vlan_bridge:
-      #  ipv4_address: $ADGUARDHOME_IPV4_BRIDGE_ADDRESS
+      adguardhome_vlan_bridge:
+        ipv4_address: $ADGUARDHOME_IPV4_BRIDGE_ADDRESS
     ports:
-      - 53/udp 
-      - 67/udp 
-      - 68/tcp 
-      - 68/udp 
-      - 80/tcp 
-      - 443/tcp 
-      - 853/tcp 
-      - 3000/tcp 
+      # Plain DNS
+      - 53/tcp
+      - 53/udp
+      # Admin Panel and DNS-over-HTTPS
+      - 80/tcp
+      - 443/tcp
+      - 443/udp
+      - 3000/tcp
+      # DNS-over-TLS
+      - 853/tcp
+      # DNS-over-QUIC
+      - 784:784/udp
+      - 853:853/udp
+      #- 8853:8853/udp
+      # DNSCrypt
+      - 5443:5443/tcp
+      - 5443:5443/udp
+      # DHCP Server
+      - 67/udp
+      - 68/tcp
+      - 68/udp
     volumes:
       - $SERVICES_DIR/adguard/conf:/opt/adguardhome/conf 
       - $SERVICES_DIR/adguard/work:/opt/adguardhome/work 
